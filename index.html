@@ -1,0 +1,4104 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pascal's Triangle Interactive Explorer</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --primary: #4f46e5;
+      --primary-soft: #eef2ff;
+      --cyan: #0284c7;
+      --cyan-soft: #e0f2fe;
+      --violet: #7c3aed;
+      --violet-soft: #ede9fe;
+      --emerald: #059669;
+      --emerald-soft: #d1fae5;
+      --amber: #d97706;
+      --amber-soft: #fef3c7;
+      --rose: #e11d48;
+      --rose-soft: #ffe4e6;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Consistent superscript & subscript positioning */
+    sup {
+      font-size: 0.72em;
+      line-height: 0;
+      position: relative;
+      vertical-align: baseline;
+      top: -0.52em;
+    }
+
+    sub {
+      font-size: 0.72em;
+      line-height: 0;
+      position: relative;
+      vertical-align: baseline;
+      bottom: -0.25em;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--violet));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: -0.5px;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+    }
+
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .mode-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      background: var(--surface-alt);
+      padding: 0.32rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.82rem;
+      padding: 0.46rem 0.8rem;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Main Layout */
+    main {
+      max-width: 1280px;
+      width: 100%;
+      margin: 1.1rem auto 2.5rem;
+      padding: 0 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      flex: 1;
+    }
+
+    /* Control Deck */
+    .control-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.9rem 1.2rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .control-label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-right: 0.2rem;
+    }
+
+    .pill-btn {
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text);
+      font-size: 0.81rem;
+      font-weight: 600;
+      padding: 0.38rem 0.78rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      line-height: 1.35;
+    }
+
+    .pill-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .pill-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .pill-btn.amber.active {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: #fff;
+    }
+
+    .pill-btn.emerald.active {
+      background: var(--emerald);
+      border-color: var(--emerald);
+      color: #fff;
+    }
+
+    .pill-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: #f1f5f9;
+      color: #94a3b8;
+    }
+
+    .link-btn {
+      border: 1px solid #c7d2fe;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.34rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .link-btn:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    input[type="range"] {
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .number-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.1rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 7px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    /* Insight / Equation Banner */
+    .insight-banner {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      padding: 0.72rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .insight-banner.feedback-warn {
+      border-left-color: var(--rose);
+      background: #fff1f2;
+    }
+
+    .insight-banner.feedback-success {
+      border-left-color: var(--emerald);
+      background: #ecfdf5;
+    }
+
+    .insight-text {
+      line-height: 1.55;
+      flex: 1 1 380px;
+    }
+
+    .insight-text strong {
+      color: var(--primary);
+    }
+
+    .equation-box {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .chip-cyan {
+      background: var(--cyan-soft);
+      color: var(--cyan);
+      padding: 0.1rem 0.45rem;
+      border-radius: 5px;
+    }
+
+    .chip-violet {
+      background: var(--violet-soft);
+      color: var(--violet);
+      padding: 0.1rem 0.45rem;
+      border-radius: 5px;
+    }
+
+    .chip-emerald {
+      background: var(--emerald-soft);
+      color: var(--emerald);
+      padding: 0.1rem 0.45rem;
+      border-radius: 5px;
+    }
+
+    .chip-amber {
+      background: var(--amber-soft);
+      color: var(--amber);
+      padding: 0.1rem 0.45rem;
+      border-radius: 5px;
+    }
+
+    .chip-rose {
+      background: var(--rose-soft);
+      color: var(--rose);
+      padding: 0.1rem 0.45rem;
+      border-radius: 5px;
+    }
+
+    /* Interactive Stage */
+    .stage-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      padding: 1.4rem 1rem;
+      overflow-x: auto;
+      position: relative;
+      min-height: 460px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      transition: background 0.25s ease;
+    }
+
+    .stage-card.fractal-dark {
+      background: #0b1120;
+      border-color: #1e293b;
+      color: #f8fafc;
+    }
+
+    /* Exact 60-degree Equilateral Triangle Grid Geometry */
+    .triangle-wrapper {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.4rem 6rem;
+      user-select: none;
+    }
+
+    /* Extra right padding when inline row calculations or Fibonacci diagonal boxes sit beside the triangle */
+    .triangle-wrapper.wide-right {
+      padding-left: 4.5rem;
+      padding-right: 19rem;
+    }
+
+    .triangle-wrapper.fib-right {
+      padding-top: 5rem;
+      padding-left: 4.5rem;
+      padding-right: 14rem;
+    }
+
+    #triangleGrid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6.5px;
+    }
+
+    #triangleGrid.compact-grid {
+      gap: 5.1px;
+    }
+
+    svg.overlay-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .tri-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .compact-grid .tri-row {
+      gap: 6px;
+    }
+
+    .row-tag {
+      position: absolute;
+      right: calc(100% + 14px);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .row-sum-tag {
+      position: absolute;
+      left: calc(100% + 14px);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .row-sum-tag:hover,
+    .row-sum-tag.active {
+      background: var(--emerald-soft);
+      border-color: var(--emerald);
+      color: var(--emerald);
+    }
+
+    /* Inline Row Calculation & Input Boxes next to the triangle (Tab 3: Row Sums & Alt Sums) */
+    .inline-row-calc {
+      position: absolute;
+      left: calc(100% + 16px);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.79rem;
+      font-weight: 600;
+      padding: 0.22rem 0.65rem;
+      border-radius: 9px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+
+    .inline-row-calc.example-calc {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: var(--text);
+    }
+
+    .inline-row-calc.solved-calc {
+      background: var(--emerald-soft);
+      border-color: var(--emerald);
+      color: var(--emerald);
+    }
+
+    .inline-row-calc.active-calc {
+      background: #fffbeb;
+      border-color: var(--amber);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.15);
+    }
+
+    .side-calc-input {
+      width: 56px;
+      padding: 0.16rem 0.35rem;
+      border-radius: 6px;
+      border: 1.5px solid var(--amber);
+      background: #ffffff;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.82rem;
+      text-align: center;
+      color: var(--text);
+      outline: none;
+    }
+
+    .side-calc-input:focus {
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+    }
+
+    /* Tilted Fibonacci Diagonal Extension Nodes aligned along each shallow diagonal */
+    #fibDiagonalLayer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .fib-diag-node {
+      --tilt: -30deg;
+      position: absolute;
+      transform: translate(0, -50%) rotate(var(--tilt));
+      transform-origin: left center;
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.28rem;
+      height: 23px;
+      padding: 0 0.52rem;
+      border-radius: 7px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      line-height: 1;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.14s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .fib-diag-node:hover {
+      transform: translate(0, -50%) rotate(var(--tilt)) scale(1.06);
+      border-color: var(--rose);
+      z-index: 7;
+    }
+
+    .fib-diag-node.solved {
+      background: var(--rose-soft);
+      border-color: var(--rose);
+      color: var(--rose);
+    }
+
+    .fib-diag-node.active {
+      background: #fff1f2;
+      border: 2px solid var(--rose);
+      color: var(--rose);
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.18);
+      z-index: 6;
+    }
+
+    /* Continuation terms (F10+) revealed automatically once F1-F9 are solved */
+    .fib-diag-node.extra {
+      cursor: default;
+      animation: fibExtraIn 0.5s ease both;
+      animation-delay: var(--delay, 0s);
+    }
+
+    .fib-diag-node.extra:hover {
+      transform: translate(0, -50%) rotate(var(--tilt));
+    }
+
+    @keyframes fibExtraIn {
+      from { opacity: 0; margin-left: -10px; }
+      to   { opacity: 1; margin-left: 0; }
+    }
+
+    .fib-node-input {
+      width: 38px;
+      height: 17px;
+      padding: 0 0.2rem;
+      border-radius: 4px;
+      border: 1.5px solid var(--rose);
+      background: #ffffff;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.75rem;
+      text-align: center;
+      color: var(--text);
+      outline: none;
+    }
+
+    /* Individual Cells */
+    .cell {
+      width: 48px;
+      height: 42px;
+      border-radius: 11px;
+      background: var(--surface-alt);
+      border: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.14s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+      position: relative;
+      line-height: 1.1;
+    }
+
+    .cell.compact {
+      width: 38px;
+      height: 33px;
+      font-size: 0.73rem;
+      border-radius: 8px;
+    }
+
+    .cell:hover {
+      transform: translateY(-2px) scale(1.06);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+      z-index: 5;
+    }
+
+    /* Semantic Cell States */
+    .cell.parent-left {
+      background: var(--cyan-soft);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      transform: scale(1.06);
+    }
+
+    .cell.parent-right {
+      background: var(--violet-soft);
+      border-color: var(--violet);
+      color: var(--violet);
+      transform: scale(1.06);
+    }
+
+    .cell.target-child {
+      background: var(--emerald-soft);
+      border-color: var(--emerald);
+      color: var(--emerald);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+      transform: scale(1.08);
+      z-index: 6;
+    }
+
+    /* Hidden & Solvable Challenge Cells */
+    .cell.hidden-cell {
+      background: #f1f5f9;
+      border: 1.5px dashed #cbd5e1;
+      color: transparent !important;
+    }
+
+    .cell.hidden-cell.solvable {
+      background: #fffbeb;
+      border: 2px dashed var(--amber);
+      color: transparent !important;
+    }
+
+    .cell.hidden-cell.solvable:not(.active-quiz)::after {
+      content: "?";
+      color: var(--amber);
+      font-weight: 800;
+      font-size: 1rem;
+      position: absolute;
+    }
+
+    .cell.hidden-cell.active-quiz {
+      background: #fffbeb;
+      border: 2.5px solid var(--amber);
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
+      transform: scale(1.1);
+      z-index: 10;
+    }
+
+    .inline-cell-input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      text-align: center;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: var(--text);
+      outline: none;
+      padding: 0;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    .cell.pattern-highlight {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(79, 70, 229, 0.28);
+    }
+
+    /* Clickable diagonal candidate in Figurative Numbers */
+    .cell.diag-candidate {
+      background: #fffbeb;
+      border: 2px dashed var(--amber);
+      color: #92400e;
+    }
+
+    .cell.diag-candidate:hover {
+      background: var(--amber-soft);
+      border-style: solid;
+    }
+
+    /* Diagonal / Hockey-stick Discovery States */
+    .cell.diag-chain {
+      background: var(--cyan-soft);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      transform: scale(1.04);
+      z-index: 3;
+    }
+
+    .cell.diag-endpoint {
+      background: #0284c7;
+      border: 2.5px solid #075985;
+      color: #ffffff;
+      transform: scale(1.09);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
+      z-index: 5;
+    }
+
+    .cell.found-match-other {
+      background: var(--emerald-soft);
+      border: 2px solid var(--emerald);
+      color: var(--emerald);
+      transform: scale(1.06);
+      z-index: 4;
+    }
+
+    .cell.found-match-turn {
+      background: var(--amber);
+      border: 2.5px solid #92400e;
+      color: #ffffff;
+      transform: scale(1.11);
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.38);
+      z-index: 6;
+    }
+
+    .cell.colour-blade-sum {
+      background: #0f172a;
+      border: 2.5px solid #f59e0b;
+      color: #fbbf24;
+      transform: scale(1.1);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+      z-index: 4;
+    }
+
+    .cell.row-highlight {
+      background: var(--emerald-soft);
+      border-color: var(--emerald);
+      color: var(--emerald);
+    }
+
+    .cell.fib-highlight {
+      background: var(--rose-soft);
+      border-color: var(--rose);
+      color: var(--rose);
+      transform: scale(1.05);
+      z-index: 3;
+    }
+
+    .cell.fib-active-seed {
+      background: var(--rose);
+      border: 2.5px solid #881337;
+      color: #ffffff;
+      transform: scale(1.1);
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.25);
+      z-index: 5;
+    }
+
+    @keyframes shakeCell {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .shake {
+      animation: shakeCell 0.25s ease-in-out 2;
+    }
+
+    /* Quiz Input inside Insight Banner */
+    .quiz-form {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .quiz-input {
+      width: 82px;
+      padding: 0.3rem 0.5rem;
+      border-radius: 7px;
+      border: 2px solid var(--amber);
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-align: center;
+      outline: none;
+    }
+
+    .quiz-submit {
+      background: var(--amber);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 0.36rem 0.72rem;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    /* Contextual Companion Cards */
+    .companion-panel {
+      width: 100%;
+      max-width: 1040px;
+      margin-top: 1.2rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .companion-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.55rem;
+    }
+
+    .companion-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .discovery-log-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .discovery-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 0.42rem 0.75rem;
+      font-size: 0.82rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .discovery-chip.highlight-chip {
+      border-color: var(--emerald);
+      background: #ecfdf5;
+    }
+
+    .fib-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .fib-info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .fib-info-card h4 {
+      font-size: 0.9rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .fib-info-card p {
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* 0^0 awareness callout */
+    .zero-zero-card {
+      background: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      border-left: 5px solid var(--amber);
+      border-radius: 11px;
+      padding: 0.85rem 1.05rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      font-size: 0.87rem;
+      line-height: 1.55;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .zero-zero-card h4 {
+      margin: 0;
+      font-size: 0.97rem;
+      color: #92400e;
+    }
+
+    .zz-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .zz-option {
+      background: var(--surface);
+      border: 1px solid #fde68a;
+      border-radius: 9px;
+      padding: 0.6rem 0.75rem;
+    }
+
+    .zz-option strong.zz-title {
+      display: block;
+      margin-bottom: 0.2rem;
+      color: #92400e;
+    }
+
+    .zz-option p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .pill-btn.attention {
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.35);
+      border-color: var(--amber);
+    }
+
+    .expansion-display {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.95rem;
+      line-height: 1.9;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 0.75rem 1rem;
+      overflow-x: auto;
+    }
+
+    .exp-coeff {
+      display: inline-block;
+      background: var(--emerald-soft);
+      color: var(--emerald);
+      border: 1px solid #a7f3d0;
+      font-weight: 800;
+      padding: 0 0.38rem;
+      border-radius: 5px;
+      margin-right: 2px;
+    }
+
+    /* Dot & 3D Pyramid Geometry Visualiser */
+    .geo-stage {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 0.35rem 0;
+    }
+
+    .geo-layer-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 84px;
+    }
+
+    .geo-layer-card.total-card {
+      border-color: var(--amber);
+      background: #fffbeb;
+    }
+
+    .dot-triangle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .geo-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .tetra-3d-wrap {
+      background: radial-gradient(circle at 50% 45%, #ffffff 0%, #eef2ff 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    canvas#tetraCanvas {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    canvas#tetraCanvas:active {
+      cursor: grabbing;
+    }
+
+    .layer-legend-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.65rem;
+      max-width: 560px;
+    }
+
+    /* Crisp SVG-parenthesis Binomial Coefficient & Fraction Notation */
+    .binom {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1;
+      margin: 0 2px;
+      transform: translateY(-0.04em);
+    }
+
+    .binom-paren {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .binom-stack {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.76em;
+      font-weight: 700;
+      line-height: 1.08;
+      padding: 0 1.5px;
+    }
+
+    .cell .binom-stack {
+      font-size: 0.78rem;
+      line-height: 1.05;
+    }
+
+    .cell.compact .binom-stack {
+      font-size: 0.67rem;
+      line-height: 1.02;
+    }
+
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 3px;
+      font-size: 0.9em;
+      line-height: 1.15;
+    }
+
+    .frac-num {
+      border-bottom: 1.5px solid currentColor;
+      padding: 0 4px 2px;
+    }
+
+    .frac-den {
+      padding: 2px 4px 0;
+    }
+
+    /* Tab 5: Theory, Proof & Applications Hub */
+    .theory-hub {
+      width: 100%;
+      max-width: 1080px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .theory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+
+    .theory-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .theory-card h3 {
+      font-size: 1.02rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theory-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .proof-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .proof-step {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 9px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      align-items: center;
+      font-size: 0.91rem;
+      line-height: 1.65;
+    }
+
+    .proof-step.active-step {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .timeline-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      font-size: 0.86rem;
+    }
+
+    .timeline-list li {
+      padding-left: 0.75rem;
+      border-left: 3px solid var(--primary);
+    }
+
+    .subset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+    }
+
+    .subset-chip {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid #c7d2fe;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    /* Progress Pill for Multiples Discovery */
+    .progress-track {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .progress-bar-bg {
+      width: 76px;
+      height: 7px;
+      background: #334155;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: #38bdf8;
+      transition: width 0.25s ease;
+    }
+
+    /* Fractal Canvas View */
+    .canvas-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    canvas#fractalCanvas {
+      max-width: 100%;
+      border-radius: 10px;
+      cursor: crosshair;
+    }
+
+    .canvas-tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: rgba(15, 23, 42, 0.94);
+      color: #f8fafc;
+      border: 1px solid #334155;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      z-index: 50;
+      display: none;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .legend-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 0.76rem;
+      color: #cbd5e1;
+      max-width: 920px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.32rem;
+      background: rgba(30, 41, 59, 0.85);
+      padding: 0.18rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #334155;
+    }
+
+    .legend-swatch {
+      width: 11px;
+      height: 11px;
+      border-radius: 3px;
+    }
+
+    @media (max-width: 820px) {
+      .cell {
+        width: 36px;
+        height: 31px;
+        font-size: 0.74rem;
+      }
+      .tri-row {
+        gap: 4px;
+      }
+      #triangleGrid {
+        gap: 3.5px;
+      }
+      .row-tag, .row-sum-tag {
+        display: none;
+      }
+      .proof-step {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">1·2·1</div>
+        <div>
+          <h1>Pascal's Triangle Explorer</h1>
+          <p>Sums, geometry, binomial expansions, fractals, and proofs</p>
+        </div>
+      </div>
+
+      <nav class="mode-tabs" role="tablist">
+        <button class="tab-btn active" data-mode="build">1. Calculate Sums</button>
+        <button class="tab-btn" data-mode="patterns">2. Patterns &amp; Geometry</button>
+        <button class="tab-btn" data-mode="sums">3. Binomial &amp; Sums</button>
+        <button class="tab-btn" data-mode="fractals">4. Multiples &amp; Fractals</button>
+        <button class="tab-btn" data-mode="theory">5. Theory &amp; Applications</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="control-panel">
+      <div class="controls-row" id="dynamicControls"></div>
+      <div class="insight-banner" id="insightBanner"></div>
+    </section>
+
+    <section class="stage-card" id="stageCard">
+      <div class="triangle-wrapper" id="triangleWrapper">
+        <svg class="overlay-lines" id="overlaySvg"></svg>
+        <div id="triangleGrid"></div>
+        <div id="fibDiagonalLayer"></div>
+      </div>
+
+      <div id="companionSlot" style="width: 100%; display: flex; justify-content: center;"></div>
+
+      <div class="canvas-container" id="canvasContainer" style="display: none;">
+        <canvas id="fractalCanvas"></canvas>
+        <div class="legend-bar" id="fractalLegend"></div>
+      </div>
+
+      <div class="theory-hub" id="theoryHub" style="display: none;"></div>
+    </section>
+  </main>
+
+  <div class="canvas-tooltip" id="canvasTooltip"></div>
+
+  <script>
+    // ==========================================
+    // 1. MATHEMATICAL ENGINE (BigInt safe up to 520 rows)
+    // ==========================================
+    const MAX_PRECOMPUTE_ROWS = 520;
+    const SQRT3_2 = Math.sqrt(3) / 2;
+    const pascalBig = [];
+
+    function buildPascalData(maxRows) {
+      for (let n = 0; n < maxRows; n++) {
+        const row = [1n];
+        for (let k = 1; k < n; k++) {
+          row.push(pascalBig[n - 1][k - 1] + pascalBig[n - 1][k]);
+        }
+        if (n > 0) row.push(1n);
+        pascalBig.push(row);
+      }
+    }
+    buildPascalData(MAX_PRECOMPUTE_ROWS);
+
+    function factorialBig(n) {
+      let res = 1n;
+      for (let i = 2n; i <= BigInt(n); i++) res *= i;
+      return res;
+    }
+
+    const LAYER_COLOURS = [
+      { bg: "#0284c7", soft: "#e0f2fe", light: "#7dd3fc", dark: "#075985", name: "Sky Blue" },
+      { bg: "#059669", soft: "#d1fae5", light: "#6ee7b7", dark: "#065f46", name: "Emerald" },
+      { bg: "#d97706", soft: "#fef3c7", light: "#fcd34d", dark: "#92400e", name: "Amber" },
+      { bg: "#7c3aed", soft: "#ede9fe", light: "#c4b5fd", dark: "#4c1d95", name: "Violet" },
+      { bg: "#e11d48", soft: "#ffe4e6", light: "#fda4af", dark: "#881337", name: "Rose" },
+      { bg: "#0d9488", soft: "#ccfbf1", light: "#5eead4", dark: "#115e59", name: "Teal" }
+    ];
+
+    const REMAINDER_COLOURS = [
+      "#38bdf8", "#f43f5e", "#fbbf24", "#34d399", "#a78bfa",
+      "#fb923c", "#e879f9", "#2dd4bf", "#f87171", "#a3e635",
+      "#60a5fa", "#facc15", "#c084fc", "#4ade80", "#f472b6",
+      "#22d3ee", "#fdba74", "#818cf8", "#bef264", "#fda4af"
+    ];
+
+    // ==========================================
+    // 2. APPLICATION STATE
+    // ==========================================
+    function createInitialRevealedSet(maxRows) {
+      const set = new Set();
+      for (let r = 0; r < maxRows; r++) {
+        set.add(`${r},0`);
+        set.add(`${r},${r}`);
+      }
+      return set;
+    }
+
+    const state = {
+      mode: "build",            // 'build' | 'patterns' | 'sums' | 'fractals' | 'theory'
+      rows: 9,
+
+      // Mode 1: Calculate Sums
+      buildSubMode: "challenge",// 'challenge' | 'explore'
+      showBinomLabels: false,
+      hoveredCell: { r: 4, k: 2 },
+      revealedSet: createInitialRevealedSet(15),
+      activeQuizCell: { r: 2, k: 1 },
+      buildMessage: "",
+
+      // Mode 2: Patterns & Geometry (Diagonal Sums -> Hockey-Stick discovery first!)
+      patternType: "hockey",    // 'hockey' | 'whole' | 'triangular' | 'tetrahedral' | 'ones'
+      diagEndpoint: { r: 4, k: 1 },
+      diagDir: "right",         // 'right' (up-right ↗) | 'left' (up-left ↖)
+      diagFoundMatches: new Set(),
+      diagSumVerified: false,
+      hockeyShownForCurrent: false,
+      diagCompletedCount: 0,
+      diagLog: [],
+      diagMessage: "",
+      geoStep: 4,
+      tetraYaw: 0.52,
+      tetraPitch: 0.42,
+      tetraExplode: 0.12,
+
+      // Mode 3: Binomial & Sums
+      sumType: "powers2",       // 'powers2' | 'altsum' | 'fibonacci' | 'binomial'
+      selectedRow: 3,
+      solvedRowSums: new Set([0, 1, 2]),
+      rowSumFeedback: "",
+      rowSumPatternRevealed: false,
+
+      solvedAltSums: new Set([0, 1, 2]),
+      altSumFeedback: "",
+      altSumPatternRevealed: false,
+
+      fibIndex: 2,              // Start at m = 2 (F_3 = 2); m = 0, 1 pre-filled as examples
+      fibSeedCell: { r: 2, k: 0 },
+      solvedFibDiags: new Set([0, 1]),
+      fibFeedback: "",
+
+      binomEvalMode: "symbolic",// 'symbolic' | 'ones' | 'alt' | 'eleven'
+
+      // Mode 4: Multiples & Fractal Zoom
+      divisor: 2,
+      colourMode: "multiples",
+      fractalRows: 16,
+      userFoundMultiples: new Set(),
+      zoomUnlocked: false,
+      fractalFeedback: null,
+
+      // Mode 5: Theory, Proofs & Applications
+      theoryTopic: "proof",     // 'proof' | 'induction' | 'combinatorics' | 'applications' | 'history'
+      proofN: 5,
+      proofR: 2,
+      indProofType: "rowsum",   // 'rowsum' | 'hockey'
+      indStepN: 4,
+      combN: 4,
+      combR: 2
+    };
+
+    // DOM References
+    const controlsEl = document.getElementById("dynamicControls");
+    const insightEl = document.getElementById("insightBanner");
+    const stageCard = document.getElementById("stageCard");
+    const triangleWrapper = document.getElementById("triangleWrapper");
+    const triangleGrid = document.getElementById("triangleGrid");
+    const overlaySvg = document.getElementById("overlaySvg");
+    const fibDiagonalLayer = document.getElementById("fibDiagonalLayer");
+    const companionSlot = document.getElementById("companionSlot");
+    const canvasContainer = document.getElementById("canvasContainer");
+    const fractalCanvas = document.getElementById("fractalCanvas");
+    const fractalLegend = document.getElementById("fractalLegend");
+    const canvasTooltip = document.getElementById("canvasTooltip");
+    const theoryHub = document.getElementById("theoryHub");
+
+    function binomHTML(n, k) {
+      return `<span class="binom"><span class="binom-paren"><svg width="6" height="22" viewBox="0 0 6 22" style="overflow:visible"><path d="M5,1 Q1,11 5,21" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round"/></svg></span><span class="binom-stack"><span>${n}</span><span>${k}</span></span><span class="binom-paren"><svg width="6" height="22" viewBox="0 0 6 22" style="overflow:visible"><path d="M1,1 Q5,11 1,21" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round"/></svg></span></span>`;
+    }
+
+    function fracHTML(num, den) {
+      return `<span class="frac"><span class="frac-num">${num}</span><span class="frac-den">${den}</span></span>`;
+    }
+
+    // ==========================================
+    // 3. TAB SWITCHING & CONTROLS RENDERING
+    // ==========================================
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.mode = btn.dataset.mode;
+        renderAll();
+      });
+    });
+
+    function renderControls() {
+      if (state.mode === "build") {
+        controlsEl.innerHTML = `
+          <div class="control-group">
+            <span class="control-label">Activity:</span>
+            <button class="pill-btn amber ${state.buildSubMode === "challenge" ? "active" : ""}" onclick="setBuildSubMode('challenge')">
+              <span>Calculate Missing Sums</span>
+            </button>
+            <button class="pill-btn ${state.buildSubMode === "explore" ? "active" : ""}" onclick="setBuildSubMode('explore')">
+              <span>Inspect Complete Triangle</span>
+            </button>
+            <button class="pill-btn ${state.showBinomLabels ? "active" : ""}" onclick="toggleBinomLabels()" title="Toggle between values and binomial coefficient notation">
+              <span>Show ${binomHTML("n", "r")} Notation</span>
+            </button>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Rows:</span>
+            <input type="range" min="6" max="11" value="${state.rows}" oninput="setRows(this.value)" />
+            <span class="number-badge">${state.rows}</span>
+            ${
+              state.buildSubMode === "challenge"
+                ? `<button class="pill-btn" onclick="solveNextCell()"><span>Hint (+1)</span></button>
+                   <button class="pill-btn" onclick="resetChallenge()"><span>Reset</span></button>`
+                : ""
+            }
+          </div>
+        `;
+      } else if (state.mode === "patterns") {
+        const { r, k } = state.diagEndpoint;
+        const canGoLeft = k > 0;
+        const canGoRight = k < r;
+        const hockeyLabel =
+          state.hockeyShownForCurrent || state.diagCompletedCount >= 2
+            ? "1. 🏒 Hockey-Stick"
+            : "1. Diagonal Sums";
+
+        controlsEl.innerHTML = `
+          <div class="control-group">
+            <span class="control-label">Explore in Order:</span>
+            <button class="pill-btn amber ${state.patternType === "hockey" ? "active" : ""}" onclick="setPattern('hockey')">
+              <span>${hockeyLabel}</span>
+            </button>
+            <button class="pill-btn ${state.patternType === "whole" ? "active" : ""}" onclick="setPattern('whole')">
+              <span>2. Whole Numbers</span>
+            </button>
+            <button class="pill-btn ${state.patternType === "triangular" ? "active" : ""}" onclick="setPattern('triangular')">
+              <span>3. Triangular Numbers</span>
+            </button>
+            <button class="pill-btn ${state.patternType === "tetrahedral" ? "active" : ""}" onclick="setPattern('tetrahedral')">
+              <span>4. Tetrahedral Numbers</span>
+            </button>
+            <button class="pill-btn ${state.patternType === "ones" ? "active" : ""}" onclick="setPattern('ones')">
+              <span>5. All 1s</span>
+            </button>
+          </div>
+          <div class="control-group">
+            ${
+              state.patternType === "hockey"
+                ? `<span class="control-label">Diagonal from Endpoint:</span>
+                   <button class="pill-btn ${state.diagDir === "left" ? "active" : ""}" ${!canGoLeft ? "disabled title='At left edge—only Up-Right diagonal available'" : ""} onclick="setDiagDir('left')"><span>↖ Up-Left</span></button>
+                   <button class="pill-btn ${state.diagDir === "right" ? "active" : ""}" ${!canGoRight ? "disabled title='At right edge—only Up-Left diagonal available'" : ""} onclick="setDiagDir('right')"><span>↗ Up-Right</span></button>
+                   <button class="pill-btn" onclick="pickRandomEndpoint()"><span>New Endpoint</span></button>`
+                : state.patternType === "whole" || state.patternType === "triangular" || state.patternType === "tetrahedral"
+                ? `<span class="control-label">Visualised Term:</span>
+                   <input type="range" min="1" max="6" value="${state.geoStep}" oninput="setGeoStep(this.value)" />
+                   <span class="number-badge">n = ${state.geoStep}</span>`
+                : `<span class="control-label">Rows:</span>
+                   <input type="range" min="7" max="11" value="${state.rows}" oninput="setRows(this.value)" />
+                   <span class="number-badge">${state.rows}</span>`
+            }
+          </div>
+        `;
+      } else if (state.mode === "sums") {
+        controlsEl.innerHTML = `
+          <div class="control-group">
+            <span class="control-label">Discover:</span>
+            <button class="pill-btn emerald ${state.sumType === "powers2" ? "active" : ""}" onclick="setSumType('powers2')">
+              <span>1. Row Sums</span>
+            </button>
+            <button class="pill-btn ${state.sumType === "altsum" ? "active" : ""}" onclick="setSumType('altsum')">
+              <span>2. Alternating Row Sums</span>
+            </button>
+            <button class="pill-btn ${state.sumType === "fibonacci" ? "active" : ""}" onclick="setSumType('fibonacci')">
+              <span>3. Fibonacci Diagonals</span>
+            </button>
+            <button class="pill-btn ${state.sumType === "binomial" ? "active" : ""}" onclick="setSumType('binomial')">
+              <span>4. Binomial Expansion (x + y)<sup>n</sup></span>
+            </button>
+          </div>
+          <div class="control-group">
+            ${
+              state.sumType === "fibonacci"
+                ? `<button class="pill-btn" onclick="revealAllFibDiags()"><span>Reveal All Diagonals</span></button>
+                   <button class="pill-btn" onclick="resetFibDiags()"><span>Reset</span></button>`
+                : state.sumType === "binomial"
+                ? `<span class="control-label">Selected Row n:</span>
+                   <input type="range" min="0" max="8" value="${state.selectedRow}" oninput="selectRow(Number(this.value))" />
+                   <span class="number-badge">n = ${state.selectedRow}</span>`
+                : `<button class="pill-btn" onclick="resetRowSumChallenge()"><span>Reset Rows 3–8</span></button>`
+            }
+          </div>
+        `;
+      } else if (state.mode === "fractals") {
+        const zoomLevels = [16, 32, 64, 128, 256, 512];
+        controlsEl.innerHTML = `
+          <div class="control-group">
+            <span class="control-label">Multiples of:</span>
+            <input type="range" min="2" max="20" value="${state.divisor}" style="width:150px" oninput="setDivisor(this.value)" />
+            <span class="number-badge">${state.divisor}</span>
+            ${
+              !state.zoomUnlocked
+                ? `<button class="pill-btn" onclick="unlockFractalNow()" title="Highlight all multiples and unlock zoom"><span>Reveal All &amp; Unlock Zoom</span></button>`
+                : `<button class="pill-btn ${state.colourMode === "multiples" ? "active" : ""}" onclick="setColourMode('multiples')"><span>Multiples Only</span></button>
+                   <button class="pill-btn ${state.colourMode === "remainders" ? "active" : ""}" onclick="setColourMode('remainders')"><span>All Remainders</span></button>`
+            }
+          </div>
+          <div class="control-group">
+            <span class="control-label">Zoom:</span>
+            ${zoomLevels
+              .map(
+                (z) =>
+                  `<button class="pill-btn amber ${state.fractalRows === z ? "active" : ""}"
+                    ${!state.zoomUnlocked && z > 16 ? "disabled title='Find multiples in the triangle first to unlock zoom!'" : ""}
+                    onclick="setFractalRows(${z})"><span>${z} rows</span></button>`
+              )
+              .join("")}
+          </div>
+        `;
+      } else if (state.mode === "theory") {
+        controlsEl.innerHTML = `
+          <div class="control-group">
+            <span class="control-label">Mathematical Deep-Dive:</span>
+            <button class="pill-btn ${state.theoryTopic === "proof" ? "active" : ""}" onclick="setTheoryTopic('proof')">
+              <span>1. Factorial Proof</span>
+            </button>
+            <button class="pill-btn ${state.theoryTopic === "induction" ? "active" : ""}" onclick="setTheoryTopic('induction')">
+              <span>2. Proof by Induction</span>
+            </button>
+            <button class="pill-btn ${state.theoryTopic === "combinatorics" ? "active" : ""}" onclick="setTheoryTopic('combinatorics')">
+              <span>3. Combinatorics</span>
+            </button>
+            <button class="pill-btn ${state.theoryTopic === "applications" ? "active" : ""}" onclick="setTheoryTopic('applications')">
+              <span>4. Applications</span>
+            </button>
+            <button class="pill-btn ${state.theoryTopic === "history" ? "active" : ""}" onclick="setTheoryTopic('history')">
+              <span>5. Global History</span>
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // ==========================================
+    // 4. INSIGHT BANNER RENDERING
+    // ==========================================
+    function renderInsight() {
+      insightEl.className = "insight-banner";
+
+      if (state.mode === "build") {
+        if (state.buildSubMode === "explore") {
+          const { r, k } = state.hoveredCell;
+          const val = pascalBig[r][k];
+          if (k === 0 || k === r) {
+            insightEl.innerHTML = `
+              <div class="insight-text">
+                <strong>Outer Edge Rule:</strong> Row ${r}, Position ${k} is ${binomHTML(r, k)} = <strong>1</strong>. Hover over any interior cell to inspect its addition rule and factorial formula!
+              </div>
+              <div class="equation-box"><span>${binomHTML(r, k)} = ${fracHTML(`${r}!`, `${k}!${r - k}!`)} = <span class="chip-emerald">${val}</span></span></div>
+            `;
+          } else {
+            const leftP = pascalBig[r - 1][k - 1];
+            const rightP = pascalBig[r - 1][k];
+            insightEl.innerHTML = `
+              <div class="insight-text">
+                <strong>Addition &amp; Combinatorics:</strong> ${binomHTML(r - 1, k - 1)} + ${binomHTML(r - 1, k)} = ${binomHTML(r, k)} &mdash; see Tab 5 for the algebraic factorial proof!
+              </div>
+              <div class="equation-box">
+                <span><span class="chip-cyan">${leftP}</span> + <span class="chip-violet">${rightP}</span> = <span class="chip-emerald">${val}</span></span>
+              </div>
+            `;
+          }
+        } else {
+          if (!state.activeQuizCell) {
+            insightEl.classList.add("feedback-success");
+            insightEl.innerHTML = `
+              <div class="insight-text">
+                <strong>🎉 Triangle Complete!</strong> You calculated every interior number. Toggle <strong>Show ${binomHTML("n", "r")} Notation</strong> above or discover diagonal patterns in Tab 2!
+              </div>
+              <button class="pill-btn emerald active" onclick="resetChallenge()"><span>Play Again</span></button>
+            `;
+            return;
+          }
+
+          const { r, k } = state.activeQuizCell;
+          const leftP = pascalBig[r - 1][k - 1];
+          const rightP = pascalBig[r - 1][k];
+          const msg = state.buildMessage
+            ? `<span style="color:var(--rose);font-weight:700;">${state.buildMessage}</span>`
+            : `<strong>Calculate the Sum:</strong> Add the two numbers directly above the highlighted cell (Row ${r}, Pos ${k} = ${binomHTML(r, k)}).`;
+
+          insightEl.innerHTML = `
+            <div class="insight-text">${msg}</div>
+            <form class="quiz-form" onsubmit="submitQuizAnswer(event, ${r}, ${k}, 'bannerQuizInput')">
+              <span><span class="chip-cyan">${leftP}</span> + <span class="chip-violet">${rightP}</span> = </span>
+              <input type="number" id="bannerQuizInput" class="quiz-input" placeholder="?" oninput="syncInputs(this.value, 'cellQuizInput')" />
+              <button type="submit" class="quiz-submit">Check</button>
+            </form>
+          `;
+        }
+      } else if (state.mode === "patterns") {
+        if (state.patternType === "hockey") {
+          const { chain, endpoint, turningCell, targetVal, allMatches } = getDiagonalAnalysis();
+          const terms = chain.map((c) => pascalBig[c.r][c.k].toString());
+          const foundCount = state.diagFoundMatches.size;
+          const totalMatches = allMatches.length;
+          const allFound = foundCount >= totalMatches;
+
+          if (allFound) {
+            insightEl.classList.add("feedback-success");
+            if (state.hockeyShownForCurrent) {
+              insightEl.innerHTML = `
+                <div class="insight-text">
+                  <strong>🏒 Hockey-Stick Revealed!</strong> <span class="chip-cyan">${terms.join(" + ")}</span> = <span class="chip-amber">${targetVal}</span>. Even though ${targetVal} appears ${totalMatches === 1 ? "once" : `${totalMatches} times`}, one instance (<span class="chip-amber">Row ${turningCell.r}, Pos ${turningCell.k}</span>) sits directly below endpoint <strong>Row ${endpoint.r}</strong>, bending into a <strong>hockey stick</strong>!
+                </div>
+                <div class="control-group">
+                  <button class="link-btn" onclick="jumpToHockeyInduction()"><span>Proof by Induction &rarr;</span></button>
+                  <button class="pill-btn emerald active" onclick="pickRandomEndpoint()"><span>Try Another Endpoint ▶</span></button>
+                </div>
+              `;
+            } else {
+              insightEl.innerHTML = `
+                <div class="insight-text">
+                  <strong>All ${totalMatches} instance${totalMatches === 1 ? "" : "s"} of ${targetVal} highlighted!</strong> Look at where they sit relative to the blue diagonal ending in <strong>Row ${endpoint.r}</strong>—or click <strong>Show the Hockey-Stick</strong>!
+                </div>
+                <div class="control-group">
+                  <button class="pill-btn amber active" onclick="showHockeyStickNow()"><span>🏒 Show the Hockey-Stick</span></button>
+                  <button class="pill-btn" onclick="pickRandomEndpoint()"><span>New Endpoint</span></button>
+                </div>
+              `;
+            }
+          } else {
+            const msgNote = state.diagMessage
+              ? `<span style="color:var(--rose);font-weight:700;">${state.diagMessage}</span>`
+              : `Click <strong>all</strong> occurrences of that sum in the triangle (${foundCount} of ${totalMatches} found), or click any number in Rows 1–7 to move the endpoint.`;
+
+            insightEl.innerHTML = `
+              <div class="insight-text">
+                <strong>Diagonal Sums:</strong> Add the highlighted diagonal (<span class="chip-cyan">${terms.join(" + ")}</span>). ${msgNote}
+              </div>
+              <form class="quiz-form" onsubmit="submitOptionalDiagSum(event)">
+                <span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Optional sum check:</span>
+                <input type="number" id="diagSumInput" class="quiz-input" value="${state.diagSumVerified ? targetVal.toString() : ""}" placeholder="?" />
+                <button type="submit" class="quiz-submit">${state.diagSumVerified ? "✓ " + targetVal : "Check"}</button>
+              </form>
+            `;
+          }
+        } else if (state.patternType === "whole") {
+          const m = state.geoStep;
+          const terms = Array.from({ length: m }, () => 1);
+          insightEl.innerHTML = `
+            <div class="insight-text">
+              <strong>Whole Numbers:</strong> Click any Whole Number along the outlined diagonal (<code>1, 2, 3, 4, 5, 6</code>) to see how coloured <strong>1</strong>s sum to <strong>${m}</strong> via the Hockey-Stick property!
+            </div>
+            <div class="equation-box">
+              <span>${terms.map((v, i) => `<span style="background:${LAYER_COLOURS[i].soft};color:${LAYER_COLOURS[i].dark};padding:0.1rem 0.42rem;border-radius:5px;">${v}</span>`).join(" + ")} = <span class="chip-amber">${m}</span></span>
+            </div>
+          `;
+        } else if (state.patternType === "triangular") {
+          const m = state.geoStep;
+          const terms = Array.from({ length: m }, (_, i) => i + 1);
+          const sumVal = (m * (m + 1)) / 2;
+          insightEl.innerHTML = `
+            <div class="insight-text">
+              <strong>Triangular Numbers:</strong> Click any Triangular Number along the outlined diagonal (<code>1, 3, 6, 10, 15, 21</code>) to see the coloured Whole Numbers that build <strong>T<sub>${m}</sub> = ${sumVal}</strong>!
+            </div>
+            <div class="equation-box">
+              <span>${terms.map((v, i) => `<span style="background:${LAYER_COLOURS[i].soft};color:${LAYER_COLOURS[i].dark};padding:0.1rem 0.42rem;border-radius:5px;">${v}</span>`).join(" + ")} = <span class="chip-amber">${sumVal}</span></span>
+            </div>
+          `;
+        } else if (state.patternType === "tetrahedral") {
+          const m = state.geoStep;
+          const terms = Array.from({ length: m }, (_, i) => ((i + 1) * (i + 2)) / 2);
+          const sumVal = (m * (m + 1) * (m + 2)) / 6;
+          insightEl.innerHTML = `
+            <div class="insight-text">
+              <strong>Tetrahedral Numbers:</strong> Click any Tetrahedral Number along the outlined diagonal (<code>1, 4, 10, 20, 35, 56</code>) to see the coloured Triangular layers of <strong>Te<sub>${m}</sub> = ${sumVal}</strong>!
+            </div>
+            <div class="equation-box">
+              <span>${terms.map((v, i) => `<span style="background:${LAYER_COLOURS[i].soft};color:${LAYER_COLOURS[i].dark};padding:0.1rem 0.42rem;border-radius:5px;">${v}</span>`).join(" + ")} = <span class="chip-amber">${sumVal}</span></span>
+            </div>
+          `;
+        } else if (state.patternType === "ones") {
+          insightEl.innerHTML = `
+            <div class="insight-text"><strong>Diagonal 0 — All 1s:</strong> Every entry along the outer edges is ${binomHTML("n", "0")} = ${binomHTML("n", "n")} = 1, forming the starting diagonals for the Hockey-Stick property.</div>
+            <div class="equation-box"><span>1, 1, 1, 1, 1, 1, …</span></div>
+          `;
+        }
+      } else if (state.mode === "sums") {
+        if (state.sumType === "powers2") {
+          const showRule = state.rowSumPatternRevealed || state.solvedRowSums.size >= 6;
+          if (showRule) {
+            insightEl.classList.add("feedback-success");
+            insightEl.innerHTML = `
+              <div class="insight-text">
+                <strong>Pattern Discovered — Powers of 2:</strong> Look down the right-hand column (<code>1, 2, 4, 8, 16, 32, 64, 128, 256</code>)—each row doubles the previous row, so Row <strong>n</strong> always sums to <strong>2<sup>n</sup></strong>!
+              </div>
+              <div class="equation-box"><span>Row n Sum = <span class="chip-emerald">2<sup>n</sup></span></span></div>
+            `;
+          } else {
+            const msg = state.rowSumFeedback
+              ? `<span style="color:var(--rose);font-weight:700;">${state.rowSumFeedback}</span>`
+              : `<strong>Discover Row Sums:</strong> Rows 0–2 are shown as examples. Type each sum into the box next to the triangle and press <strong>Enter</strong> to jump to the next row!`;
+            insightEl.innerHTML = `
+              <div class="insight-text">${msg}</div>
+              ${
+                state.solvedRowSums.size >= 5
+                  ? `<button class="link-btn" onclick="revealRowSumPattern()"><span>I See the Pattern!</span></button>`
+                  : `<span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Solved: ${state.solvedRowSums.size} / 9 rows</span>`
+              }
+            `;
+          }
+        } else if (state.sumType === "altsum") {
+          const showRule = state.altSumPatternRevealed || state.solvedAltSums.size >= 6;
+          if (showRule) {
+            insightEl.classList.add("feedback-success");
+            insightEl.innerHTML = `
+              <div class="insight-text">
+                <strong>Pattern Discovered — Always Zero (for n &ge; 1):</strong> Alternating signs across every row after Row 0 cancels out completely to <strong>0</strong>, because (1 &minus; 1)<sup>n</sup> = 0<sup>n</sup> = 0! Row 0 is the odd one out (it gives 1)—see the note on 0<sup>0</sup> below.
+              </div>
+              <div class="equation-box"><span>Alt Sum (n &ge; 1) = <span class="chip-emerald">0</span></span></div>
+            `;
+          } else {
+            const msg = state.altSumFeedback
+              ? `<span style="color:var(--rose);font-weight:700;">${state.altSumFeedback}</span>`
+              : `<strong>Discover Alternating Row Sums:</strong> Rows 0–2 are shown as examples. Enter each alternating sum into the box next to the triangle and press <strong>Enter</strong>!`;
+            insightEl.innerHTML = `
+              <div class="insight-text">${msg}</div>
+              ${
+                state.solvedAltSums.size >= 5
+                  ? `<button class="link-btn" onclick="revealAltSumPattern()"><span>I See the Pattern!</span></button>`
+                  : `<span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Solved: ${state.solvedAltSums.size} / 9 rows</span>`
+              }
+            `;
+          }
+        } else if (state.sumType === "fibonacci") {
+          const m = state.fibIndex;
+          const fibCells = getFibonacciCells(m);
+          const terms = fibCells.map((c) => pascalBig[c.r][c.k].toString());
+          const allDone = state.solvedFibDiags.size >= 9;
+
+          if (allDone) {
+            insightEl.classList.add("feedback-success");
+            insightEl.innerHTML = `
+              <div class="insight-text">
+                <strong>🌀 The Fibonacci numbers appear!</strong> Your shallow diagonals sum to <strong>1, 1, 2, 3, 5, 8, 13, 21, 34</strong>—each term is the sum of the two before it. So there is no need to keep adding: <strong>21 + 34 = 55</strong>, <strong>34 + 55 = 89</strong>, <strong>55 + 89 = 144</strong>. The next terms, <strong>F<sub>10</sub> to F<sub>17</sub></strong>, have been filled in for you beside the triangle. Their diagonals run off the bottom of the visible triangle, but the pattern doesn&rsquo;t stop, and the sequence carries on forever…
+              </div>
+              <div class="equation-box"><span>F<sub>${m + 1}</sub>: ${terms.join(" + ")} = <span class="chip-rose">${fibCells.reduce((a, c) => a + pascalBig[c.r][c.k], 0n)}</span></span></div>
+            `;
+          } else {
+            const msg = state.fibFeedback
+              ? `<span style="color:var(--rose);font-weight:700;">${state.fibFeedback}</span>`
+              : `<strong>Shallow Diagonals:</strong> Click any number in the triangle to highlight its shallow diagonal, then type its sum into the tilted box extending that diagonal and press <strong>Enter</strong>!`;
+            insightEl.innerHTML = `
+              <div class="insight-text">${msg}</div>
+              <div class="equation-box"><span>Diagonal ${m + 1}: <span class="chip-rose">${terms.join(" + ")}</span> = ?</span></div>
+            `;
+          }
+        } else if (state.sumType === "binomial") {
+          const n = state.selectedRow;
+          insightEl.innerHTML = `
+            <div class="insight-text">
+              <strong>Binomial Theorem:</strong> Row <strong>n = ${n}</strong> gives all coefficients (including the outer <strong>1</strong>s) of <strong>(x + y)<sup>${n}</sup></strong>!
+            </div>
+            <div class="equation-box">
+              <span>(x + y)<sup>${n}</sup> = &Sigma; ${binomHTML(n, "k")} x<sup>${n}-k</sup> y<sup>k</sup></span>
+            </div>
+          `;
+        }
+      } else if (state.mode === "fractals") {
+        if (!state.zoomUnlocked) {
+          const target = getDiscoveryTargetCount(state.divisor);
+          const found = state.userFoundMultiples.size;
+          const pct = Math.min(100, Math.round((found / target) * 100));
+
+          if (state.fractalFeedback && state.fractalFeedback.type === "warn") {
+            insightEl.classList.add("feedback-warn");
+          }
+
+          const promptText =
+            state.fractalFeedback && state.fractalFeedback.type === "warn"
+              ? `<strong>Not quite!</strong> ${state.fractalFeedback.text}`
+              : `<strong>Find Multiples of ${state.divisor}:</strong> Click <strong>${target}</strong> numbers in the 16-row triangle that are divisible by <strong>${state.divisor}</strong> to unlock Fractal Zoom!`;
+
+          insightEl.innerHTML = `
+            <div class="insight-text">${promptText}</div>
+            <div class="progress-track">
+              <span>Found ${found} / ${target}</span>
+              <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+            </div>
+          `;
+        } else {
+          insightEl.classList.add("feedback-success");
+          const isPrime = [2, 3, 5, 7, 11, 13, 17, 19].includes(state.divisor);
+          const customNote =
+            state.fractalFeedback && state.fractalFeedback.text
+              ? state.fractalFeedback.text
+              : state.divisor === 2
+              ? "Multiples of 2 carve out the famous Sierpiński Triangle fractal at every zoom scale!"
+              : isPrime
+              ? `Because ${state.divisor} is prime, self-similar triangles of size ${state.divisor}, ${state.divisor ** 2}, … repeat across scales (Lucas's Theorem)!`
+              : `Composite divisors like ${state.divisor} create intricate overlapping fractal sub-triangles.`;
+
+          insightEl.innerHTML = `
+            <div class="insight-text">
+              <strong>Fractal Zoom Unlocked (mod ${state.divisor}):</strong> ${customNote}
+            </div>
+            <div class="equation-box">
+              <span>Zoom: <span class="chip-cyan">${state.fractalRows} rows</span> (${((state.fractalRows * (state.fractalRows + 1)) / 2).toLocaleString()} numbers)</span>
+            </div>
+          `;
+        }
+      } else if (state.mode === "theory") {
+        const subtitles = {
+          proof: "Algebraic proof showing why the factorial formula for C(n, r) always equals the sum of the two entries above it.",
+          induction: "Using mathematical induction and Pascal's addition rule to prove universal properties for every row n.",
+          combinatorics: "Why Pascal's triangle counts combinations—choosing r items from a set of n distinct objects.",
+          applications: "How Pascal's triangle powers polynomial expansion, probability distributions, shortest grid paths, and fractals.",
+          history: "Over 2,000 years of independent discovery across India, Persia, China, and Europe."
+        };
+        insightEl.innerHTML = `
+          <div class="insight-text"><strong>The Mathematics Behind Pascal's Triangle:</strong> ${subtitles[state.theoryTopic]}</div>
+        `;
+      }
+    }
+
+    // ==========================================
+    // 5. PATTERN & GEOMETRY HELPERS
+    // ==========================================
+    function getDiagonalAnalysis() {
+      const visibleRows = 9;
+      let { r, k } = state.diagEndpoint;
+      if (r < 1) r = 1;
+      if (r >= visibleRows - 1) r = visibleRows - 2;
+      if (k < 0) k = 0;
+      if (k > r) k = r;
+
+      let dir = state.diagDir;
+      if (k === 0) dir = "right";
+      if (k === r) dir = "left";
+
+      const chain = [];
+      let turningCell;
+
+      if (dir === "right") {
+        for (let i = k; i <= r; i++) {
+          chain.push({ r: i, k });
+        }
+        turningCell = { r: r + 1, k: k + 1 };
+      } else {
+        for (let j = 0; j <= k; j++) {
+          chain.push({ r: r - k + j, k: j });
+        }
+        turningCell = { r: r + 1, k };
+      }
+
+      const targetVal = pascalBig[turningCell.r][turningCell.k];
+      const allMatches = [];
+      for (let rr = 0; rr < visibleRows; rr++) {
+        for (let kk = 0; kk <= rr; kk++) {
+          if (pascalBig[rr][kk] === targetVal) {
+            allMatches.push({ r: rr, k: kk });
+          }
+        }
+      }
+
+      return { chain, endpoint: { r, k }, dir, turningCell, targetVal, allMatches };
+    }
+
+    function getColouredPatternHockey() {
+      const m = state.geoStep;
+      if (state.patternType === "whole") {
+        const shaft = [];
+        for (let i = 0; i < m; i++) {
+          shaft.push({ r: i, k: 0, colourIdx: i });
+        }
+        return { shaft, blade: { r: m, k: 1 }, diagCol: 1 };
+      }
+      if (state.patternType === "triangular") {
+        const shaft = [];
+        for (let i = 1; i <= m; i++) {
+          shaft.push({ r: i, k: 1, colourIdx: i - 1 });
+        }
+        return { shaft, blade: { r: m + 1, k: 2 }, diagCol: 2 };
+      }
+      if (state.patternType === "tetrahedral") {
+        const shaft = [];
+        for (let i = 1; i <= m; i++) {
+          shaft.push({ r: i + 1, k: 2, colourIdx: i - 1 });
+        }
+        return { shaft, blade: { r: m + 2, k: 3 }, diagCol: 3 };
+      }
+      return null;
+    }
+
+    // Callout explaining the 0^0 question raised by (1 - 1)^0 in Row 0
+    function zeroPowerZeroHTML() {
+      return `
+        <div class="zero-zero-card">
+          <h4>⚠️ Wait — what is 0<sup>0</sup>?</h4>
+          <div>
+            Row 0 says the alternating sum is <strong>1</strong>, and the Binomial Theorem gives (1 &minus; 1)<sup>0</sup> = 0<sup>0</sup>.
+            For every n &ge; 1 we have 0<sup>n</sup> = 0, so is the pattern broken at n = 0? It depends on how we <em>define</em> 0<sup>0</sup>. There are three common options:
+          </div>
+          <div class="zz-options">
+            <div class="zz-option">
+              <strong class="zz-title">Option 1: 0<sup>0</sup> = 1</strong>
+              <p>Any number to the power 0 is 1 (x<sup>0</sup> = 1 for x &ne; 0, an &ldquo;empty product&rdquo;). Counting: there is exactly one way to choose nothing from nothing.</p>
+            </div>
+            <div class="zz-option">
+              <strong class="zz-title">Option 2: 0<sup>0</sup> = 0</strong>
+              <p>Zero to any power is 0 (0<sup>n</sup> = 0 for n &ge; 1), so perhaps the pattern should continue down to n = 0.</p>
+            </div>
+            <div class="zz-option">
+              <strong class="zz-title">Option 3: leave it undefined</strong>
+              <p>Following x<sup>y</sup> towards (0, 0) gives different answers on different routes: 1 along y = 0, but 0 along x = 0. So as a <em>limit</em> it is indeterminate.</p>
+            </div>
+          </div>
+          <div>
+            <strong>How do we decide?</strong> It isn&rsquo;t a fact waiting to be discovered&mdash;it&rsquo;s a convention, chosen so that our formulas keep working.
+            The Binomial Theorem needs (x + y)<sup>0</sup> = 1 for <em>all</em> x and y, including y = &minus;x, and the geometric series, polynomials and e<sup>x</sup> = &Sigma; x<sup>k</sup>/k! all need x<sup>0</sup> = 1 at x = 0 too.
+            Pascal&rsquo;s triangle agrees: Row 0 is a single <strong>1</strong>.
+            So algebra, combinatorics and computer science define <strong>0<sup>0</sup> = 1</strong>, while in analysis it stays an indeterminate <em>limit</em> form. That is why the pattern is &ldquo;always 0 for n &ge; 1&rdquo; and the n = 0 case is the special one.
+          </div>
+        </div>
+      `;
+    }
+
+    function getFibonacciCells(m) {
+      const cells = [];
+      for (let k = 0; k <= Math.floor(m / 2); k++) {
+        const r = m - k;
+        if (r < 9) {
+          cells.push({ r, k });
+        }
+      }
+      return cells;
+    }
+
+    function isCellSolvable(r, k) {
+      if (state.revealedSet.has(`${r},${k}`)) return false;
+      if (k === 0 || k === r) return true;
+      return state.revealedSet.has(`${r - 1},${k - 1}`) && state.revealedSet.has(`${r - 1},${k}`);
+    }
+
+    function getAllMultiplesInRows(divisor, numRows) {
+      const modBig = BigInt(divisor);
+      const list = [];
+      for (let r = 0; r < numRows; r++) {
+        for (let k = 0; k <= r; k++) {
+          if (pascalBig[r][k] % modBig === 0n) {
+            list.push(`${r},${k}`);
+          }
+        }
+      }
+      return list;
+    }
+
+    function getDiscoveryTargetCount(divisor) {
+      const inFirst10 = getAllMultiplesInRows(divisor, 10).length;
+      if (inFirst10 > 0) {
+        return Math.min(10, inFirst10);
+      }
+      const inFirst16 = getAllMultiplesInRows(divisor, 16).length;
+      return Math.min(10, inFirst16);
+    }
+
+    // ==========================================
+    // 6. RENDER TRIANGLE (DOM + SVG OVERLAY + FIBONACCI DIAGONAL NODES)
+    // ==========================================
+    function renderTriangleDOM() {
+      const useFractalDOM = state.mode === "fractals" && state.fractalRows === 16;
+      const numRows =
+        state.mode === "patterns" &&
+        (state.patternType === "hockey" ||
+          state.patternType === "whole" ||
+          state.patternType === "triangular" ||
+          state.patternType === "tetrahedral")
+          ? 9
+          : state.mode === "sums"
+          ? 9
+          : useFractalDOM
+          ? 16
+          : state.rows;
+
+      const isCompact = numRows > 10;
+      triangleGrid.classList.toggle("compact-grid", isCompact);
+
+      triangleWrapper.classList.remove("wide-right", "fib-right");
+      if (state.mode === "sums" && (state.sumType === "powers2" || state.sumType === "altsum")) {
+        triangleWrapper.classList.add("wide-right");
+      } else if (state.mode === "sums" && state.sumType === "fibonacci") {
+        triangleWrapper.classList.add("fib-right");
+      }
+
+      let html = "";
+
+      const diagData =
+        state.mode === "patterns" && state.patternType === "hockey" ? getDiagonalAnalysis() : null;
+      const colouredPatternHockey =
+        state.mode === "patterns" ? getColouredPatternHockey() : null;
+      const fibSet =
+        state.mode === "sums" && state.sumType === "fibonacci"
+          ? new Set(getFibonacciCells(state.fibIndex).map((c) => `${c.r},${c.k}`))
+          : null;
+
+      for (let r = 0; r < numRows; r++) {
+        html += `<div class="tri-row" data-row="${r}">`;
+        html += `<span class="row-tag">Row ${r}</span>`;
+
+        for (let k = 0; k <= r; k++) {
+          const val = pascalBig[r][k];
+          let classes = ["cell"];
+          if (isCompact) classes.push("compact");
+          let inlineStyle = "";
+
+          let innerContent =
+            state.mode === "build" && state.showBinomLabels
+              ? binomHTML(r, k)
+              : val.toString();
+
+          // Mode 1: Calculate Sums
+          if (state.mode === "build") {
+            if (state.buildSubMode === "explore") {
+              const { r: hr, k: hk } = state.hoveredCell;
+              if (r === hr && k === hk) classes.push("target-child");
+              if (hk > 0 && hk < hr) {
+                if (r === hr - 1 && k === hk - 1) classes.push("parent-left");
+                if (r === hr - 1 && k === hk) classes.push("parent-right");
+              }
+            } else {
+              const key = `${r},${k}`;
+              const isRevealed = state.revealedSet.has(key);
+              const isActive =
+                state.activeQuizCell &&
+                state.activeQuizCell.r === r &&
+                state.activeQuizCell.k === k;
+
+              if (!isRevealed) {
+                classes.push("hidden-cell");
+                if (isCellSolvable(r, k)) classes.push("solvable");
+                if (isActive) {
+                  classes.push("active-quiz");
+                  innerContent = `<input type="number" id="cellQuizInput" class="inline-cell-input" placeholder="?"
+                    onclick="event.stopPropagation()"
+                    oninput="syncInputs(this.value, 'bannerQuizInput')"
+                    onkeydown="if(event.key==='Enter'){ submitQuizAnswer(event, ${r}, ${k}, 'cellQuizInput'); }" />`;
+                } else {
+                  innerContent = "";
+                }
+              }
+
+              if (
+                state.activeQuizCell &&
+                r === state.activeQuizCell.r - 1 &&
+                k === state.activeQuizCell.k - 1
+              ) {
+                classes.push("parent-left");
+              }
+              if (
+                state.activeQuizCell &&
+                r === state.activeQuizCell.r - 1 &&
+                k === state.activeQuizCell.k
+              ) {
+                classes.push("parent-right");
+              }
+            }
+          }
+
+          // Mode 2: Patterns & Geometry
+          if (state.mode === "patterns") {
+            if (state.patternType === "ones" && (k === 0 || k === r)) classes.push("pattern-highlight");
+
+            if (colouredPatternHockey) {
+              const shaftMatch = colouredPatternHockey.shaft.find((c) => c.r === r && c.k === k);
+              const isSelectedBlade =
+                colouredPatternHockey.blade.r === r && colouredPatternHockey.blade.k === k;
+              const isClickableCandidate =
+                k === colouredPatternHockey.diagCol &&
+                r >= colouredPatternHockey.diagCol &&
+                r <= colouredPatternHockey.diagCol + 5;
+
+              if (shaftMatch) {
+                const col = LAYER_COLOURS[shaftMatch.colourIdx % LAYER_COLOURS.length];
+                inlineStyle = `background: ${col.bg}; border-color: ${col.dark}; color: #ffffff; transform: scale(1.06); box-shadow: 0 3px 10px rgba(15, 23, 42, 0.16); z-index: 4;`;
+              } else if (isSelectedBlade) {
+                classes.push("colour-blade-sum");
+              } else if (isClickableCandidate) {
+                classes.push("diag-candidate");
+              }
+            }
+
+            if (diagData) {
+              const key = `${r},${k}`;
+              if (diagData.endpoint.r === r && diagData.endpoint.k === k) {
+                classes.push("diag-endpoint");
+              } else if (diagData.chain.some((c) => c.r === r && c.k === k)) {
+                classes.push("diag-chain");
+              }
+
+              if (state.diagFoundMatches.has(key)) {
+                if (
+                  state.hockeyShownForCurrent &&
+                  diagData.turningCell.r === r &&
+                  diagData.turningCell.k === k
+                ) {
+                  classes.push("found-match-turn");
+                } else {
+                  classes.push("found-match-other");
+                }
+              }
+            }
+          }
+
+          // Mode 3: Binomial & Sums
+          if (state.mode === "sums") {
+            if (
+              (state.sumType === "powers2" || state.sumType === "altsum" || state.sumType === "binomial") &&
+              r === state.selectedRow
+            ) {
+              classes.push("row-highlight");
+            }
+            if (fibSet && fibSet.has(`${r},${k}`)) {
+              if (state.fibSeedCell && state.fibSeedCell.r === r && state.fibSeedCell.k === k) {
+                classes.push("fib-active-seed");
+              } else {
+                classes.push("fib-highlight");
+              }
+            }
+          }
+
+          // Mode 4: Multiples (16 rows interactive discovery)
+          if (useFractalDOM) {
+            const key = `${r},${k}`;
+            const rem = Number(val % BigInt(state.divisor));
+            if (!state.zoomUnlocked) {
+              if (state.userFoundMultiples.has(key)) {
+                inlineStyle = `background: ${REMAINDER_COLOURS[0]}; border-color: #0284c7; color: #0f172a; box-shadow: 0 0 12px rgba(56, 189, 248, 0.45);`;
+              } else {
+                inlineStyle = `background: #1e293b; border-color: #334155; color: #e2e8f0;`;
+              }
+            } else if (state.colourMode === "multiples") {
+              if (rem === 0) {
+                inlineStyle = `background: ${REMAINDER_COLOURS[0]}; border-color: #0284c7; color: #0f172a;`;
+              } else {
+                inlineStyle = `background: #1e293b; border-color: #334155; color: #94a3b8;`;
+              }
+            } else {
+              const col = REMAINDER_COLOURS[rem % REMAINDER_COLOURS.length];
+              inlineStyle = `background: ${col}; border-color: rgba(255,255,255,0.35); color: #0f172a;`;
+            }
+          }
+
+          html += `<div class="${classes.join(" ")}" style="${inlineStyle}" data-r="${r}" data-k="${k}" onclick="handleCellClick(${r}, ${k})" onmouseenter="handleCellHover(${r}, ${k})">${innerContent}</div>`;
+        }
+
+        // Inline Row Sums & Alternating Row Sums right next to the triangle!
+        if (state.mode === "sums" && state.sumType === "powers2") {
+          const rowVals = pascalBig[r].map((v) => v.toString());
+          const expr = rowVals.join("+");
+          const sumVal = (1n << BigInt(r)).toString();
+          const isExample = r <= 2;
+          const isSolved = state.solvedRowSums.has(r) || state.rowSumPatternRevealed;
+          const showPow = state.rowSumPatternRevealed || state.solvedRowSums.size >= 6;
+
+          if (isExample) {
+            html += `<div class="inline-row-calc example-calc" onclick="selectRow(${r})">
+              <span>${expr} = <strong>${sumVal}</strong>${showPow ? ` (2<sup>${r}</sup>)` : ""}</span>
+            </div>`;
+          } else if (isSolved) {
+            html += `<div class="inline-row-calc solved-calc" onclick="selectRow(${r})">
+              <span>${expr} = <strong>${sumVal}</strong>${showPow ? ` (2<sup>${r}</sup>)` : ""} &#10003;</span>
+            </div>`;
+          } else {
+            const isActive = r === state.selectedRow;
+            html += `<div class="inline-row-calc ${isActive ? "active-calc" : ""}" onclick="selectRow(${r})">
+              <span>${expr} =</span>
+              <input type="number" id="rowSumInput-${r}" class="side-calc-input" placeholder="?"
+                onclick="event.stopPropagation(); state.selectedRow=${r};"
+                onkeydown="if(event.key==='Enter'){ event.preventDefault(); submitInlineRowSum(${r}); }" />
+            </div>`;
+          }
+        } else if (state.mode === "sums" && state.sumType === "altsum") {
+          const rowVals = pascalBig[r];
+          const expr = rowVals
+            .map((v, i) => (i === 0 ? v.toString() : i % 2 === 0 ? `+${v}` : `-${v}`))
+            .join("");
+          const altVal = r === 0 ? 1 : 0;
+          const isExample = r <= 2;
+          const isSolved = state.solvedAltSums.has(r) || state.altSumPatternRevealed;
+
+          if (isExample) {
+            html += `<div class="inline-row-calc example-calc" onclick="selectRow(${r})">
+              <span>${expr} = <strong>${altVal}</strong></span>
+            </div>`;
+          } else if (isSolved) {
+            html += `<div class="inline-row-calc solved-calc" onclick="selectRow(${r})">
+              <span>${expr} = <strong>${altVal}</strong> &#10003;</span>
+            </div>`;
+          } else {
+            const isActive = r === state.selectedRow;
+            html += `<div class="inline-row-calc ${isActive ? "active-calc" : ""}" onclick="selectRow(${r})">
+              <span>${expr} =</span>
+              <input type="number" id="altSumInput-${r}" class="side-calc-input" placeholder="?"
+                onclick="event.stopPropagation(); state.selectedRow=${r};"
+                onkeydown="if(event.key==='Enter'){ event.preventDefault(); submitInlineAltSum(${r}); }" />
+            </div>`;
+          }
+        } else if (state.mode === "sums" && state.sumType === "binomial") {
+          html += `<span class="row-sum-tag ${r === state.selectedRow ? "active" : ""}" onclick="selectRow(${r})"><span>(x + y)<sup>${r}</sup></span></span>`;
+        }
+
+        html += `</div>`;
+      }
+
+      triangleGrid.innerHTML = html;
+
+      // Focus active inline input smoothly
+      if (state.mode === "build" && state.buildSubMode === "challenge") {
+        const cellInp = document.getElementById("cellQuizInput");
+        if (cellInp) cellInp.focus();
+      } else if (state.mode === "sums" && state.sumType === "powers2") {
+        const rInp = document.getElementById(`rowSumInput-${state.selectedRow}`);
+        if (rInp) rInp.focus();
+      } else if (state.mode === "sums" && state.sumType === "altsum") {
+        const aInp = document.getElementById(`altSumInput-${state.selectedRow}`);
+        if (aInp) aInp.focus();
+      }
+
+      renderCompanionPanel();
+      requestAnimationFrame(() => {
+        renderFibonacciDiagonalOverlay();
+        drawSvgConnectors();
+      });
+    }
+
+    // ==========================================
+    // 6A. TILTED FIBONACCI DIAGONAL EXTENSION OVERLAY (Aligned with each shallow diagonal!)
+    // ==========================================
+    let fibNodePositions = []; // [{ m, x, y, anchorX, anchorY, edgeX, edgeY }]
+
+    function renderFibonacciDiagonalOverlay() {
+      fibDiagonalLayer.innerHTML = "";
+      fibNodePositions = [];
+
+      if (!(state.mode === "sums" && state.sumType === "fibonacci")) return;
+
+      const wrapperRect = triangleWrapper.getBoundingClientRect();
+      const row0El = triangleGrid.querySelector('.cell[data-r="0"][data-k="0"]');
+      const row1RightEl = triangleGrid.querySelector('.cell[data-r="1"][data-k="1"]');
+      const row2LeftEl = triangleGrid.querySelector('.cell[data-r="2"][data-k="0"]');
+      if (!row0El || !row1RightEl || !row2LeftEl) return;
+
+      const centreOf = (el) => {
+        const rc = el.getBoundingClientRect();
+        return {
+          x: rc.left - wrapperRect.left + rc.width / 2,
+          y: rc.top - wrapperRect.top + rc.height / 2
+        };
+      };
+      const c00 = centreOf(row0El);
+      const c11 = centreOf(row1RightEl);
+      const c20 = centreOf(row2LeftEl);
+      const x0 = c00.x;
+      const y0 = c00.y;
+
+      // Right-flank step vector (down-right from (0,0) to (1,1))
+      const flankX = c11.x - c00.x;
+      const flankY = c11.y - c00.y;
+
+      // Shallow-diagonal step: consecutive cells (r, k) -> (r-1, k+1),
+      // e.g. from (2,0) up-right to (1,1). This is 1.5 cell-widths right and one row up.
+      const diagVecX = c11.x - c20.x;
+      const diagVecY = c11.y - c20.y;
+      const diagLen = Math.hypot(diagVecX, diagVecY) || 1;
+      const uX = diagVecX / diagLen;
+      const uY = diagVecY / diagLen;
+      const tiltDeg = (Math.atan2(uY, uX) * 180) / Math.PI;
+
+      // Gap (px) from the point where the diagonal meets the right flank to the start of the box
+      const startGap = 40;
+
+      let nodesHtml = "";
+      for (let m = 0; m <= 8; m++) {
+        const cells = getFibonacciCells(m);
+        const topRightCell = cells[cells.length - 1];
+        const cellEl = triangleGrid.querySelector(
+          `.cell[data-r="${topRightCell.r}"][data-k="${topRightCell.k}"]`
+        );
+        if (!cellEl) continue;
+
+        const cRect = cellEl.getBoundingClientRect();
+        const anchorX = cRect.left - wrapperRect.left + cRect.width / 2;
+        const anchorY = cRect.top - wrapperRect.top + cRect.height / 2;
+
+        // Shallow diagonal m meets the right flank of the triangle at (m/2) flank steps from the apex
+        // (for even m this is exactly the last cell of the diagonal).
+        const flankX_m = x0 + (m / 2) * flankX;
+        const flankY_m = y0 + (m / 2) * flankY;
+
+        // The box starts on that same line, so it is a true collinear extension of the diagonal.
+        // Its left-centre is the transform origin, so it grows outward along the diagonal.
+        const bx = flankX_m + startGap * uX;
+        const by = flankY_m + startGap * uY;
+
+        const sum = cells.reduce((acc, c) => acc + pascalBig[c.r][c.k], 0n).toString();
+        const isSolved = state.solvedFibDiags.has(m);
+        const isActive = m === state.fibIndex;
+
+        // Dashed connector ends exactly where the box begins
+        const edgeX = bx;
+        const edgeY = by;
+
+        fibNodePositions.push({ m, x: bx, y: by, anchorX, anchorY, edgeX, edgeY });
+
+        if (isSolved) {
+          nodesHtml += `
+            <div class="fib-diag-node solved ${isActive ? "active" : ""}"
+              style="left:${bx}px;top:${by}px;--tilt:${tiltDeg.toFixed(2)}deg;"
+              onclick="selectFibDiagonal(${m})" title="F_${m + 1} = ${sum}">
+              <span>F<sub>${m + 1}</sub> = <strong>${sum}</strong></span>
+            </div>
+          `;
+        } else {
+          nodesHtml += `
+            <div class="fib-diag-node ${isActive ? "active" : ""}"
+              style="left:${bx}px;top:${by}px;--tilt:${tiltDeg.toFixed(2)}deg;"
+              onclick="selectFibDiagonal(${m})">
+              <span>F<sub>${m + 1}</sub> =</span>
+              <input type="number" id="fibInput-${m}" class="fib-node-input" placeholder="?"
+                onclick="event.stopPropagation(); if(state.fibIndex !== ${m}){ selectFibDiagonal(${m}); }"
+                onkeydown="if(event.key==='Enter'){ event.preventDefault(); submitFibSum(${m}); }" />
+            </div>
+          `;
+        }
+      }
+
+      // Once F1..F9 are solved, reveal the next few terms from the recurrence F(n) = F(n-1) + F(n-2)
+      if (state.solvedFibDiags.size >= 9) {
+        const fibVals = [1n, 1n];
+        for (let i = 2; i < 17; i++) fibVals.push(fibVals[i - 1] + fibVals[i - 2]);
+        // Every diagonal up to m = 16 still touches the triangle (Row 8), so we continue that far
+        for (let m = 9; m <= 16; m++) {
+          const cells = getFibonacciCells(m);
+          const topRightCell = cells[cells.length - 1];
+          const cellEl = triangleGrid.querySelector(
+            `.cell[data-r="${topRightCell.r}"][data-k="${topRightCell.k}"]`
+          );
+          if (!cellEl) continue;
+          const cRect = cellEl.getBoundingClientRect();
+          const anchorX = cRect.left - wrapperRect.left + cRect.width / 2;
+          const anchorY = cRect.top - wrapperRect.top + cRect.height / 2;
+
+          const bx = x0 + (m / 2) * flankX + startGap * uX;
+          const by = y0 + (m / 2) * flankY + startGap * uY;
+          fibNodePositions.push({ m, x: bx, y: by, anchorX, anchorY, edgeX: bx, edgeY: by, extra: true });
+
+          nodesHtml += `
+            <div class="fib-diag-node solved extra"
+              style="left:${bx}px;top:${by}px;--tilt:${tiltDeg.toFixed(2)}deg;--delay:${(m - 9) * 0.18}s;"
+              title="F_${m + 1} = F_${m} + F_${m - 1} = ${fibVals[m - 1]} + ${fibVals[m - 2]}">
+              <span>F<sub>${m + 1}</sub> = <strong>${fibVals[m]}</strong></span>
+            </div>
+          `;
+        }
+      }
+
+      fibDiagonalLayer.innerHTML = nodesHtml;
+
+      if (!state.solvedFibDiags.has(state.fibIndex)) {
+        const activeFibInp = document.getElementById(`fibInput-${state.fibIndex}`);
+        if (activeFibInp) activeFibInp.focus();
+      }
+    }
+
+    // ==========================================
+    // 6B. CONTEXTUAL COMPANION PANEL
+    // ==========================================
+    function renderCompanionPanel() {
+      companionSlot.innerHTML = "";
+
+      // 1. Diagonal Sums / Hockey-Stick Discovery Log
+      if (state.mode === "patterns" && state.patternType === "hockey") {
+        const { allMatches } = getDiagonalAnalysis();
+        const allFound = state.diagFoundMatches.size >= allMatches.length;
+
+        if (state.diagLog.length > 0 || allFound) {
+          const chipsHtml = state.diagLog
+            .map(
+              (item, idx) => `
+              <div class="discovery-chip ${idx === state.diagLog.length - 1 ? "highlight-chip" : ""}">
+                <span><strong>#${idx + 1}:</strong> ${item.terms.join(" + ")} = <strong>${item.sum}</strong></span>
+                <span style="color:var(--text-muted)">(Endpoint Row ${item.endpointR} &rarr; Match in <strong>Row ${item.turningRow}</strong>)</span>
+              </div>
+            `
+            )
+            .join("");
+
+          companionSlot.innerHTML = `
+            <div class="companion-panel">
+              <div class="companion-header">
+                <span class="companion-title">Your Diagonal Sum Discoveries (${state.diagLog.length} completed)</span>
+                <span style="font-size:0.82rem;color:var(--text-muted)">Click any cell in Rows 1–7 to test another endpoint!</span>
+              </div>
+              <div class="discovery-log-grid">${chipsHtml}</div>
+            </div>
+          `;
+        }
+      }
+
+      // 2. Whole Numbers Visualisation
+      if (state.mode === "patterns" && state.patternType === "whole") {
+        const m = state.geoStep;
+        let dotsHtml = "";
+        const terms = [];
+
+        for (let i = 1; i <= m; i++) {
+          const col = LAYER_COLOURS[(i - 1) % LAYER_COLOURS.length];
+          terms.push(`<span style="color:${col.dark};font-weight:800;">1</span>`);
+          dotsHtml += `<span class="geo-dot" style="background:${col.bg};width:18px;height:18px;" title="Entry ${i}: 1"></span>`;
+        }
+
+        companionSlot.innerHTML = `
+          <div class="companion-panel">
+            <div class="companion-header">
+              <span class="companion-title">1D Line Visualisation: Whole Number ${m} = ${binomHTML(m, 1)}</span>
+              <span style="font-size:0.82rem;color:var(--text-muted)">Click any Whole Number (1–6) in the triangle above to inspect it</span>
+            </div>
+            <div class="geo-stage">
+              <div class="geo-layer-card total-card">
+                <div class="dot-row" style="gap:7px;padding:4px 0;">${dotsHtml}</div>
+                <div style="font-size:0.85rem;font-weight:700;margin-top:4px;">${terms.join(" + ")} = <span style="color:var(--amber)">${m}</span></div>
+              </div>
+              <div style="max-width:490px;font-size:0.88rem;color:var(--text-muted);">
+                Walking down the outer diagonal adds <strong>1</strong> at every step. Using the Hockey-Stick property on <strong>${m}</strong> coloured 1s produces the whole number <strong>${m}</strong>—which in turn becomes the building block for Triangular Numbers!
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 3. Triangular Numbers Visualisation
+      if (state.mode === "patterns" && state.patternType === "triangular") {
+        const m = state.geoStep;
+        const triVal = (m * (m + 1)) / 2;
+        let dotsHtml = "";
+        const terms = [];
+
+        for (let r = 1; r <= m; r++) {
+          const col = LAYER_COLOURS[(r - 1) % LAYER_COLOURS.length];
+          terms.push(`<span style="color:${col.dark};font-weight:800;">${r}</span>`);
+          let rowDots = "";
+          for (let c = 0; c < r; c++) {
+            rowDots += `<span class="geo-dot" style="background:${col.bg};"></span>`;
+          }
+          dotsHtml += `<div class="dot-row">${rowDots}</div>`;
+        }
+
+        companionSlot.innerHTML = `
+          <div class="companion-panel">
+            <div class="companion-header">
+              <span class="companion-title">🔺 2D Triangle Visualisation: Triangular Number T<sub>${m}</sub> = ${binomHTML(m + 1, 2)} = ${triVal}</span>
+              <span style="font-size:0.82rem;color:var(--text-muted)">Click any Triangular Number (1, 3, 6, 10, 15, 21) in the triangle above</span>
+            </div>
+            <div class="geo-stage">
+              <div class="geo-layer-card total-card">
+                <div class="dot-triangle">${dotsHtml}</div>
+                <div style="font-size:0.85rem;font-weight:700;margin-top:6px;">${terms.join(" + ")} = <span style="color:var(--amber)">${triVal} dots</span></div>
+              </div>
+              <div style="max-width:490px;font-size:0.88rem;color:var(--text-muted);">
+                Look at how the colours match: Row 1 has <strong style="color:${LAYER_COLOURS[0].dark}">1</strong> dot, Row 2 has <strong style="color:${LAYER_COLOURS[1 % 6].dark}">2</strong> dots, and so on down to Row ${m}. Adding those coloured rows together produces the triangular number <strong>${triVal}</strong>—the exact Hockey-Stick blade in Pascal's triangle!
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 4. Tetrahedral Numbers Visualisation
+      if (state.mode === "patterns" && state.patternType === "tetrahedral") {
+        const m = state.geoStep;
+        const tetVal = (m * (m + 1) * (m + 2)) / 6;
+        let layersHtml = "";
+        const triTerms = [];
+
+        for (let layer = 1; layer <= m; layer++) {
+          const tVal = (layer * (layer + 1)) / 2;
+          const col = LAYER_COLOURS[(layer - 1) % LAYER_COLOURS.length];
+          triTerms.push(`<span style="color:${col.dark};font-weight:800;">${tVal}</span>`);
+          let dotsHtml = "";
+          for (let r = 1; r <= layer; r++) {
+            let rowDots = "";
+            for (let c = 0; c < r; c++) {
+              rowDots += `<span class="geo-dot" style="background:${col.bg};width:10px;height:10px;"></span>`;
+            }
+            dotsHtml += `<div class="dot-row" style="gap:3px;">${rowDots}</div>`;
+          }
+          layersHtml += `
+            <div class="geo-layer-card" style="border-color:${col.bg};background:${col.soft};">
+              <div class="dot-triangle" style="gap:3px;">${dotsHtml}</div>
+              <span style="font-size:0.78rem;font-weight:800;color:${col.dark}">Layer ${layer}: ${tVal}</span>
+            </div>
+          `;
+        }
+
+        companionSlot.innerHTML = `
+          <div class="companion-panel">
+            <div class="companion-header">
+              <span class="companion-title">🔷 3D Tetrahedron Visualisation: Te<sub>${m}</sub> = ${binomHTML(m + 2, 3)} = ${tetVal}</span>
+              <div class="control-group">
+                <span class="control-label">Separate Layers:</span>
+                <input type="range" min="0" max="0.65" step="0.05" value="${state.tetraExplode}" style="width:95px" oninput="setTetraExplode(this.value)" />
+              </div>
+            </div>
+            <div class="geo-stage">
+              <div class="tetra-3d-wrap">
+                <canvas id="tetraCanvas" width="270" height="240"></canvas>
+                <span style="font-size:0.74rem;color:var(--text-muted);font-weight:600;">Drag to rotate 3D tetrahedron</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0.75rem;align-items:center;">
+                <div class="layer-legend-grid">
+                  ${layersHtml}
+                  <div class="geo-layer-card total-card">
+                    <div style="font-size:1.25rem;font-weight:800;color:var(--amber)">= ${tetVal}</div>
+                    <div style="font-size:0.78rem;font-weight:700">${triTerms.join(" + ")}</div>
+                    <span style="font-size:0.72rem;color:var(--text-muted);">Total spheres</span>
+                  </div>
+                </div>
+                <p style="max-width:520px;font-size:0.86rem;color:var(--text-muted);text-align:center;">
+                  Stacking the <strong>${m}</strong> coloured triangular layers from top to bottom forms a 3D regular tetrahedron with <strong>${tetVal}</strong> spheres—matching the Hockey-Stick sum along Diagonal 2!
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        requestAnimationFrame(initAndDrawTetra3D);
+      }
+
+      // 5. Tab 3 Companion Panels
+      if (state.mode === "sums" && state.sumType === "powers2") {
+        const showRule = state.rowSumPatternRevealed || state.solvedRowSums.size >= 6;
+        if (showRule) {
+          companionSlot.innerHTML = `
+            <div class="companion-panel">
+              <div class="companion-header">
+                <span class="companion-title">Why Every Row Sums to 2<sup>n</sup></span>
+              </div>
+              <p style="font-size:0.88rem;color:var(--text-muted);">
+                When forming Row <em>n + 1</em> from Row <em>n</em>, every entry in Row <em>n</em> is added into two children directly below it—once to the left and once to the right—so the total doubles at every step: <strong>1, 2, 4, 8, 16, 32, 64, 128, 256 = 2<sup>n</sup></strong>.
+              </p>
+            </div>
+          `;
+        }
+      }
+
+      if (state.mode === "sums" && state.sumType === "altsum") {
+        const showRule = state.altSumPatternRevealed || state.solvedAltSums.size >= 6;
+        if (showRule) {
+          companionSlot.innerHTML = `
+            <div class="companion-panel">
+              <div class="companion-header">
+                <span class="companion-title">Why Every Alternating Row Sum (n &ge; 1) Equals 0</span>
+              </div>
+              <p style="font-size:0.88rem;color:var(--text-muted);">
+                In the Binomial Theorem <strong>(x + y)<sup>n</sup></strong>, substituting <strong>x = 1</strong> and <strong>y = &minus;1</strong> produces the alternating sum of Row <em>n</em>, which equals <strong>(1 &minus; 1)<sup>n</sup> = 0<sup>n</sup> = 0</strong>. Combinatorially, every non-empty set has equally many subsets of even size as of odd size!
+              </p>
+              ${zeroPowerZeroHTML()}
+            </div>
+          `;
+        }
+      }
+
+      if (state.mode === "sums" && state.sumType === "fibonacci") {
+        companionSlot.innerHTML = `
+          <div class="companion-panel">
+            <div class="companion-header">
+              <span class="companion-title">🌀 Why the Fibonacci Sequence Matters</span>
+              <span style="font-size:0.82rem;color:var(--text-muted)">1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89…</span>
+            </div>
+            <div class="fib-info-grid">
+              <div class="fib-info-card">
+                <h4>🔢 How the Sequence Works</h4>
+                <p>Starting with <strong>1, 1</strong>, every subsequent term is the sum of the two preceding terms (<strong>F<sub>n</sub> = F<sub>n&minus;1</sub> + F<sub>n&minus;2</sub></strong>). Because each shallow diagonal in Pascal's triangle is built by adding entries from the two diagonals directly above it, Pascal's addition rule automatically generates the Fibonacci recurrence!</p>
+              </div>
+              <div class="fib-info-card">
+                <h4>✨ The Golden Ratio (&phi; &approx; 1.618)</h4>
+                <p>As you step further along the sequence, the ratio of consecutive Fibonacci numbers (<strong>8/5 = 1.6</strong>, <strong>13/8 = 1.625</strong>, <strong>34/21 &approx; 1.619</strong>) converges to the <strong>Golden Ratio &phi; = (1 + &radic;5) / 2 &approx; 1.61803…</strong>, a proportion celebrated across geometry, architecture, and art.</p>
+              </div>
+              <div class="fib-info-card">
+                <h4>🌻 Nature &amp; Computer Science</h4>
+                <p><strong>In nature:</strong> Plants pack seeds and leaves using consecutive Fibonacci spirals (such as 34 and 55 spirals on a sunflower head, or 8 and 13 on a pinecone) so sunlight and space are maximised without overlap.<br/><strong>In computing:</strong> Fibonacci numbers power <em>Fibonacci search</em>, <em>Fibonacci heaps</em> in network routing, and classic dynamic programming algorithms.</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (state.mode === "sums" && state.sumType === "binomial") {
+        const n = state.selectedRow;
+        const rowCoeffs = pascalBig[n];
+        const terms = [];
+
+        for (let k = 0; k <= n; k++) {
+          const c = rowCoeffs[k].toString();
+          const powX = n - k;
+          const powY = k;
+          const partX = powX === 0 ? "" : powX === 1 ? "x" : `x<sup>${powX}</sup>`;
+          const partY = powY === 0 ? "" : powY === 1 ? "y" : `y<sup>${powY}</sup>`;
+          const varPart = partX + partY;
+          terms.push(`<span class="exp-coeff">${c}</span>${varPart}`);
+        }
+
+        let evalNote = "";
+        if (state.binomEvalMode === "ones") {
+          const sum = (1n << BigInt(n)).toString();
+          evalNote = `<strong>Plug in x = 1, y = 1:</strong> (1 + 1)<sup>${n}</sup> = ${rowCoeffs.join(" + ")} = <strong>${sum} (2<sup>${n}</sup>)</strong> — confirming your Row Sums discovery!`;
+        } else if (state.binomEvalMode === "alt") {
+          const altTerms = rowCoeffs.map((v, i) => (i % 2 === 0 ? `+${v}` : `-${v}`)).join(" ");
+          evalNote = `<strong>Plug in x = 1, y = -1:</strong> (1 - 1)<sup>${n}</sup> = ${altTerms} = <strong>${n === 0 ? 1 : 0}</strong> — ${n === 0 ? "Row 0 gives 1, but (1 &minus; 1)<sup>0</sup> looks like <strong>0<sup>0</sup></strong>. See the note below!" : `which is 0<sup>${n}</sup> = 0 — confirming your Alternating Row Sums discovery!`}`;
+        } else if (state.binomEvalMode === "eleven") {
+          const elevenPow = (11n ** BigInt(n)).toString();
+          evalNote = `<strong>Plug in x = 10, y = 1:</strong> (10 + 1)<sup>${n}</sup> = 11<sup>${n}</sup> = <strong>${elevenPow}</strong> — for rows 0 to 4, the digits literally read off the row!`;
+        } else {
+          evalNote = `<strong>Why it works:</strong> Expanding (x + y)(x + y)…(x + y) chooses <em>y</em> from <em>k</em> of the <em>n</em> brackets and <em>x</em> from the remaining <em>n - k</em> brackets in ${binomHTML(n, "k")} ways. Notice how the green badges read off Row ${n} of the triangle!`;
+        }
+
+        companionSlot.innerHTML = `
+          <div class="companion-panel">
+            <div class="companion-header">
+              <span class="companion-title"><span>Algebraic Expansion of (x + y)<sup>${n}</sup></span></span>
+              <div class="control-group">
+                <button class="pill-btn ${state.binomEvalMode === "symbolic" ? "active" : ""}" onclick="setBinomEval('symbolic')"><span>Symbolic (x + y)<sup>${n}</sup></span></button>
+                <button class="pill-btn emerald ${state.binomEvalMode === "ones" ? "active" : ""}" onclick="setBinomEval('ones')"><span>x=1, y=1 &rarr; 2<sup>${n}</sup></span></button>
+                <button class="pill-btn ${state.binomEvalMode === "alt" ? "active" : ""} ${n === 0 && state.binomEvalMode !== "alt" ? "attention" : ""}" onclick="setBinomEval('alt')"><span>x=1, y=-1 &rarr; ${n === 0 ? "0<sup>0</sup> = ?" : `0<sup>${n}</sup> = 0`}</span></button>
+                <button class="pill-btn ${state.binomEvalMode === "eleven" ? "active" : ""}" onclick="setBinomEval('eleven')"><span>x=10, y=1 &rarr; 11<sup>${n}</sup></span></button>
+              </div>
+            </div>
+            <div class="expansion-display">
+              (x + y)<sup>${n}</sup> = ${terms.join(" + ")}
+            </div>
+            <div style="font-size:0.86rem;color:var(--text-muted);">${evalNote}</div>
+            ${n === 0 && state.binomEvalMode === "alt" ? zeroPowerZeroHTML() : ""}
+          </div>
+        `;
+      }
+    }
+
+    // ==========================================
+    // 6C. INTERACTIVE 3D TETRAHEDRON RENDERER
+    // ==========================================
+    function initAndDrawTetra3D() {
+      const canvas = document.getElementById("tetraCanvas");
+      if (!canvas) return;
+
+      let dragging = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      canvas.onpointerdown = (e) => {
+        dragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        canvas.setPointerCapture(e.pointerId);
+      };
+
+      canvas.onpointermove = (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        state.tetraYaw += dx * 0.012;
+        state.tetraPitch = Math.max(-0.4, Math.min(1.25, state.tetraPitch + dy * 0.012));
+        drawTetraScene(canvas);
+      };
+
+      canvas.onpointerup = () => {
+        dragging = false;
+      };
+
+      drawTetraScene(canvas);
+    }
+
+    function drawTetraScene(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = 270;
+      const cssH = 240;
+      canvas.width = cssW * dpr;
+      canvas.height = cssH * dpr;
+      canvas.style.width = `${cssW}px`;
+      canvas.style.height = `${cssH}px`;
+
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, cssW, cssH);
+
+      const m = state.geoStep;
+      const layerHeight = Math.sqrt(2 / 3) + state.tetraExplode;
+      const spheres = [];
+
+      for (let layer = 1; layer <= m; layer++) {
+        const y = ((m - 1) / 2 - (layer - 1)) * layerHeight;
+        const col = LAYER_COLOURS[(layer - 1) % LAYER_COLOURS.length];
+
+        for (let i = 0; i < layer; i++) {
+          const z = (i - (2 * (layer - 1)) / 3) * SQRT3_2;
+          for (let j = 0; j <= i; j++) {
+            const x = j - i / 2;
+
+            const x1 = x * Math.cos(state.tetraYaw) + z * Math.sin(state.tetraYaw);
+            const z1 = -x * Math.sin(state.tetraYaw) + z * Math.cos(state.tetraYaw);
+            const y2 = y * Math.cos(state.tetraPitch) - z1 * Math.sin(state.tetraPitch);
+            const z2 = y * Math.sin(state.tetraPitch) + z1 * Math.cos(state.tetraPitch);
+
+            spheres.push({ x: x1, y: y2, z: z2, col });
+          }
+        }
+      }
+
+      spheres.sort((a, b) => a.z - b.z);
+
+      const span = Math.max(2.2, m * 1.05 + state.tetraExplode * m * 0.6);
+      const scale = 175 / span;
+      const sphereR = Math.max(7, Math.min(22, scale * 0.48));
+      const cx = cssW / 2;
+      const cy = cssH / 2 + 6;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(cx, cssH - 22, Math.min(105, 32 + m * 11), 11, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(15, 23, 42, 0.10)";
+      ctx.fill();
+      ctx.restore();
+
+      for (const s of spheres) {
+        const sx = cx + s.x * scale;
+        const sy = cy - s.y * scale;
+
+        const grad = ctx.createRadialGradient(
+          sx - sphereR * 0.34,
+          sy - sphereR * 0.34,
+          sphereR * 0.12,
+          sx,
+          sy,
+          sphereR
+        );
+        grad.addColorStop(0, "#ffffff");
+        grad.addColorStop(0.28, s.col.light);
+        grad.addColorStop(0.72, s.col.bg);
+        grad.addColorStop(1, s.col.dark);
+
+        ctx.beginPath();
+        ctx.arc(sx, sy, sphereR, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = "rgba(15, 23, 42, 0.25)";
+        ctx.stroke();
+      }
+    }
+
+    function drawSvgConnectors() {
+      overlaySvg.innerHTML = "";
+      const wrapperRect = triangleWrapper.getBoundingClientRect();
+      overlaySvg.setAttribute("width", wrapperRect.width);
+      overlaySvg.setAttribute("height", wrapperRect.height);
+
+      function getCenter(r, k) {
+        const el = triangleGrid.querySelector(`.cell[data-r="${r}"][data-k="${k}"]`);
+        if (!el) return null;
+        const rect = el.getBoundingClientRect();
+        return {
+          x: rect.left - wrapperRect.left + rect.width / 2,
+          y: rect.top - wrapperRect.top + rect.height / 2
+        };
+      }
+
+      function addLine(p1, p2, colour, width = 4, dash = "") {
+        if (!p1 || !p2) return;
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", p1.x);
+        line.setAttribute("y1", p1.y);
+        line.setAttribute("x2", p2.x);
+        line.setAttribute("y2", p2.y);
+        line.setAttribute("stroke", colour);
+        line.setAttribute("stroke-width", width);
+        line.setAttribute("stroke-linecap", "round");
+        if (dash) line.setAttribute("stroke-dasharray", dash);
+        overlaySvg.appendChild(line);
+      }
+
+      if (state.mode === "build") {
+        const target = state.buildSubMode === "explore" ? state.hoveredCell : state.activeQuizCell;
+        if (target && target.k > 0 && target.k < target.r) {
+          const cChild = getCenter(target.r, target.k);
+          const cLeft = getCenter(target.r - 1, target.k - 1);
+          const cRight = getCenter(target.r - 1, target.k);
+          addLine(cLeft, cChild, "#0284c7", 3, "4 3");
+          addLine(cRight, cChild, "#7c3aed", 3, "4 3");
+        }
+      }
+
+      if (state.mode === "patterns" && state.patternType === "hockey") {
+        const { chain, turningCell } = getDiagonalAnalysis();
+        const chainPts = chain.map((c) => getCenter(c.r, c.k)).filter(Boolean);
+        for (let i = 0; i < chainPts.length - 1; i++) {
+          addLine(chainPts[i], chainPts[i + 1], "#0284c7", 5);
+        }
+        if (state.hockeyShownForCurrent && chainPts.length > 0) {
+          const turnPt = getCenter(turningCell.r, turningCell.k);
+          addLine(chainPts[chainPts.length - 1], turnPt, "#d97706", 5);
+        }
+      }
+
+      if (
+        state.mode === "patterns" &&
+        (state.patternType === "whole" ||
+          state.patternType === "triangular" ||
+          state.patternType === "tetrahedral")
+      ) {
+        const colouredHockey = getColouredPatternHockey();
+        if (colouredHockey) {
+          const points = [...colouredHockey.shaft, colouredHockey.blade]
+            .map((c) => getCenter(c.r, c.k))
+            .filter(Boolean);
+          for (let i = 0; i < points.length - 1; i++) {
+            const isBladeSegment = i === points.length - 2;
+            addLine(points[i], points[i + 1], isBladeSegment ? "#f59e0b" : "#94a3b8", 4.5);
+          }
+        }
+      }
+
+      if (state.mode === "sums" && state.sumType === "fibonacci") {
+        // Straight collinear dashed extensions along each shallow diagonal directly into its tilted box
+        for (const node of fibNodePositions) {
+          const isCurrent = !node.extra && node.m === state.fibIndex;
+          addLine(
+            { x: node.anchorX, y: node.anchorY },
+            { x: node.edgeX, y: node.edgeY },
+            isCurrent ? "#e11d48" : "#cbd5e1",
+            isCurrent ? 3 : 1.8,
+            "4 4"
+          );
+        }
+
+        // Solid rose line connecting the cells along the selected shallow diagonal
+        const fibCells = getFibonacciCells(state.fibIndex);
+        const points = fibCells.map((c) => getCenter(c.r, c.k)).filter(Boolean);
+        for (let i = 0; i < points.length - 1; i++) {
+          addLine(points[i], points[i + 1], "#e11d48", 4.5);
+        }
+      }
+    }
+
+    // ==========================================
+    // 7. FRACTAL ZOOM CANVAS RENDERER (Exact 60° Equilateral Triangle)
+    // ==========================================
+    let canvasGeometry = null;
+
+    function renderFractalCanvas() {
+      const N = state.fractalRows;
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.min(980, stageCard.clientWidth - 32);
+      const height = Math.max(500, Math.min(760, width * 0.86));
+
+      fractalCanvas.width = width * dpr;
+      fractalCanvas.height = height * dpr;
+      fractalCanvas.style.width = `${width}px`;
+      fractalCanvas.style.height = `${height}px`;
+
+      const ctx = fractalCanvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      const pad = 18;
+      const usableW = width - pad * 2;
+      const usableH = height - pad * 2;
+
+      const dxW = usableW / N;
+      const dxH = usableH / ((N - 1) * SQRT3_2 + 1);
+      const dx = Math.min(dxW, dxH);
+      const dy = dx * SQRT3_2;
+      const radius = Math.max(0.55, dx * 0.44);
+
+      const totalTriHeight = (N - 1) * dy + dx;
+      const padY = (height - totalTriHeight) / 2 + dx * 0.5;
+
+      canvasGeometry = { N, width, padY, dy, dx, radius };
+      const modBig = BigInt(state.divisor);
+
+      for (let r = 0; r < N; r++) {
+        const y = padY + r * dy;
+        const rowWidth = r * dx;
+        const startX = width / 2 - rowWidth / 2;
+
+        for (let k = 0; k <= r; k++) {
+          const x = startX + k * dx;
+          const rem = Number(pascalBig[r][k] % modBig);
+
+          let fillStyle;
+          if (state.colourMode === "multiples") {
+            fillStyle = rem === 0 ? REMAINDER_COLOURS[0] : "rgba(51, 65, 85, 0.42)";
+          } else {
+            fillStyle = REMAINDER_COLOURS[rem % REMAINDER_COLOURS.length];
+          }
+
+          ctx.fillStyle = fillStyle;
+          if (radius < 1.35) {
+            const size = Math.max(1.1, radius * 2);
+            ctx.fillRect(x - size / 2, y - size / 2, size, size);
+          } else if (radius >= 4.5) {
+            ctx.beginPath();
+            for (let s = 0; s < 6; s++) {
+              const angle = (Math.PI / 3) * s - Math.PI / 6;
+              const px = x + radius * Math.cos(angle);
+              const py = y + radius * Math.sin(angle);
+              if (s === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+          } else {
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      if (state.colourMode === "multiples") {
+        fractalLegend.innerHTML = `
+          <span class="legend-item"><span class="legend-swatch" style="background:${REMAINDER_COLOURS[0]}"></span>Multiple of ${state.divisor} (rem 0)</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#334155"></span>Not divisible by ${state.divisor}</span>
+        `;
+      } else {
+        let items = "";
+        for (let i = 0; i < state.divisor; i++) {
+          items += `<span class="legend-item"><span class="legend-swatch" style="background:${REMAINDER_COLOURS[i % REMAINDER_COLOURS.length]}"></span>Rem ${i}</span>`;
+        }
+        fractalLegend.innerHTML = items;
+      }
+    }
+
+    fractalCanvas.addEventListener("mousemove", (e) => {
+      if (!canvasGeometry) return;
+      const rect = fractalCanvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      const { N, width, padY, dy, dx } = canvasGeometry;
+      const r = Math.round((my - padY) / dy);
+      if (r >= 0 && r < N) {
+        const rowWidth = r * dx;
+        const startX = width / 2 - rowWidth / 2;
+        const k = Math.round((mx - startX) / dx);
+        if (k >= 0 && k <= r) {
+          const cellX = startX + k * dx;
+          if (Math.abs(mx - cellX) <= Math.max(dx * 0.65, 5)) {
+            const rem = Number(pascalBig[r][k] % BigInt(state.divisor));
+            canvasTooltip.style.display = "block";
+            canvasTooltip.style.left = `${e.clientX + 14}px`;
+            canvasTooltip.style.top = `${e.clientY - 12}px`;
+            canvasTooltip.innerHTML = `Row ${r}, Pos ${k} &bull; Remainder mod ${state.divisor}: <strong>${rem}</strong>`;
+            return;
+          }
+        }
+      }
+      canvasTooltip.style.display = "none";
+    });
+
+    fractalCanvas.addEventListener("mouseleave", () => {
+      canvasTooltip.style.display = "none";
+    });
+
+    // ==========================================
+    // 8. TAB 5: THEORY, PROOFS & APPLICATIONS RENDERER
+    // ==========================================
+    function renderTheoryHub() {
+      if (state.theoryTopic === "proof") {
+        const n = state.proofN;
+        const r = Math.min(state.proofR, n - 1);
+        const valLeft = pascalBig[n - 1][r - 1];
+        const valRight = pascalBig[n - 1][r];
+        const valTarget = pascalBig[n][r];
+
+        const factN = factorialBig(n);
+        const factNm1 = factorialBig(n - 1);
+        const factR = factorialBig(r);
+        const factRm1 = factorialBig(r - 1);
+        const factNmR = factorialBig(n - r);
+        const factNmRm1 = factorialBig(n - r - 1);
+
+        theoryHub.innerHTML = `
+          <div class="proof-box">
+            <div class="companion-header">
+              <span class="companion-title">Algebraic Proof of Pascal's Identity: ${binomHTML("n - 1", "r - 1")} + ${binomHTML("n - 1", "r")} = ${binomHTML("n", "r")}</span>
+              <div class="control-group">
+                <span class="control-label">Test with numbers:</span>
+                <span>n =</span>
+                <input type="range" min="2" max="8" value="${n}" style="width:90px" oninput="setProofParams(this.value, ${r})" />
+                <span class="number-badge">${n}</span>
+                <span>r =</span>
+                <input type="range" min="1" max="${n - 1}" value="${r}" style="width:90px" oninput="setProofParams(${n}, this.value)" />
+                <span class="number-badge">${r}</span>
+              </div>
+            </div>
+
+            <div class="proof-step">
+              <div>
+                <strong>Step 1 — Expand using the Factorial Definition:</strong><br/>
+                ${binomHTML("n-1", "r-1")} + ${binomHTML("n-1", "r")} =
+                ${fracHTML("(n - 1)!", "(r - 1)!(n - r)!")} + ${fracHTML("(n - 1)!", "r!(n - r - 1)!")}
+              </div>
+              <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                <strong>With n = ${n}, r = ${r}:</strong><br/>
+                ${fracHTML(`${n - 1}!`, `${r - 1}!${n - r}!`)} + ${fracHTML(`${n - 1}!`, `${r}!${n - r - 1}!`)}
+                = ${fracHTML(factNm1, factRm1 * factNmR)} + ${fracHTML(factNm1, factR * factNmRm1)}
+                = <strong>${valLeft} + ${valRight}</strong>
+              </div>
+            </div>
+
+            <div class="proof-step">
+              <div>
+                <strong>Step 2 — Find a Common Denominator r!(n - r)!:</strong><br/>
+                Since <em>r! = r(r - 1)!</em> and <em>(n - r)! = (n - r)(n - r - 1)!</em>, multiply left by ${fracHTML("r", "r")} and right by ${fracHTML("n - r", "n - r")}:<br/>
+                ${fracHTML("r &middot; (n - 1)!", "r!(n - r)!")} + ${fracHTML("(n - r) &middot; (n - 1)!", "r!(n - r)!")}
+              </div>
+              <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                <strong>Common Denominator ${r}!${n - r}! = ${factR * factNmR}:</strong><br/>
+                ${fracHTML(`${r} &middot; ${factNm1}`, factR * factNmR)} + ${fracHTML(`${n - r} &middot; ${factNm1}`, factR * factNmR)}
+                = ${fracHTML(BigInt(r) * factNm1 + BigInt(n - r) * factNm1, factR * factNmR)}
+              </div>
+            </div>
+
+            <div class="proof-step">
+              <div>
+                <strong>Step 3 — Combine Numerators &amp; Factor out (n - 1)!:</strong><br/>
+                ${fracHTML("(n - 1)![r + (n - r)]", "r!(n - r)!")} = ${fracHTML("n &middot; (n - 1)!", "r!(n - r)!")}
+              </div>
+              <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                <strong>Factor out ${n - 1}! = ${factNm1}:</strong><br/>
+                ${fracHTML(`${factNm1} &middot; [${r} + ${n - r}]`, factR * factNmR)} = ${fracHTML(`${n} &middot; ${factNm1}`, factR * factNmR)}
+              </div>
+            </div>
+
+            <div class="proof-step active-step">
+              <div>
+                <strong>Step 4 — Simplify n &middot; (n - 1)! = n!:</strong><br/>
+                ${fracHTML("n!", "r!(n - r)!")} = ${binomHTML("n", "r")} &nbsp;&#9724;
+              </div>
+              <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--emerald);">
+                <strong>Result:</strong> ${fracHTML(`${n}!`, `${r}!${n - r}!`)} = ${fracHTML(factN, factR * factNmR)} = <strong style="color:var(--emerald)">${valTarget} = ${binomHTML(n, r)}</strong>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (state.theoryTopic === "induction") {
+        const k = state.indStepN;
+        if (state.indProofType === "rowsum") {
+          const rowK = pascalBig[k].map((v) => v.toString());
+          const rowKp1 = pascalBig[k + 1].map((v) => v.toString());
+          const sumK = (1n << BigInt(k)).toString();
+          const sumKp1 = (1n << BigInt(k + 1)).toString();
+
+          theoryHub.innerHTML = `
+            <div class="proof-box">
+              <div class="companion-header">
+                <span class="companion-title"><span>Proof by Induction: Sum of Row n Equals 2<sup>n</sup></span></span>
+                <div class="control-group">
+                  <button class="pill-btn active" onclick="setIndProofType('rowsum')"><span>Row Sum = 2<sup>n</sup></span></button>
+                  <button class="pill-btn" onclick="setIndProofType('hockey')"><span>Hockey-Stick Identity</span></button>
+                  <span class="control-label" style="margin-left:0.4rem">Step k:</span>
+                  <input type="range" min="1" max="7" value="${k}" style="width:85px" oninput="setIndStepN(this.value)" />
+                  <span class="number-badge">k = ${k}</span>
+                </div>
+              </div>
+
+              <div class="proof-step">
+                <div>
+                  <strong>1. Proposition P(n):</strong><br/>
+                  For every integer <em>n &ge; 0</em>, the sum of the entries in Row <em>n</em> is:<br/>
+                  &Sigma;<sub>r=0..n</sub> ${binomHTML("n", "r")} = <strong>2<sup>n</sup></strong>
+                </div>
+                <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                  <strong>Example for k = ${k} &rarr; k + 1 = ${k + 1}:</strong><br/>
+                  Row ${k}: ${rowK.join(" + ")} = <strong>${sumK} = 2<sup>${k}</sup></strong>
+                </div>
+              </div>
+
+              <div class="proof-step">
+                <div>
+                  <strong>2. Base Case (n = 0):</strong><br/>
+                  Row 0 contains only ${binomHTML(0, 0)} = 1, and 2<sup>0</sup> = 1.<br/>
+                  Since LHS = RHS = 1, <strong>P(0) is true</strong>.
+                </div>
+                <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                  <strong>Base Check:</strong> Row 0 sum = <strong>1</strong> = 2<sup>0</sup> &#10003;
+                </div>
+              </div>
+
+              <div class="proof-step">
+                <div>
+                  <strong>3. Inductive Hypothesis:</strong><br/>
+                  Assume <strong>P(k)</strong> is true for some integer <em>k &ge; 0</em>:<br/>
+                  ${binomHTML("k", "0")} + ${binomHTML("k", "1")} + … + ${binomHTML("k", "k")} = <strong>2<sup>k</sup></strong>
+                </div>
+                <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                  <strong>Assumed for k = ${k}:</strong><br/>
+                  Sum of Row ${k} = <strong>${sumK}</strong>
+                </div>
+              </div>
+
+              <div class="proof-step active-step">
+                <div>
+                  <strong>4. Inductive Step (Prove P(k + 1)):</strong><br/>
+                  Rewrite each interior entry of Row <em>k + 1</em> using Pascal's rule ${binomHTML("k+1", "r")} = ${binomHTML("k", "r-1")} + ${binomHTML("k", "r")}:<br/>
+                  &Sigma;<sub>r=0..k+1</sub> ${binomHTML("k+1", "r")} = 1 + &Sigma;<sub>r=1..k</sub> [${binomHTML("k", "r-1")} + ${binomHTML("k", "r")}] + 1<br/>
+                  Every term in Row <em>k</em> appears <strong>twice</strong>, so:<br/>
+                  = 2 &middot; (&Sigma;<sub>r=0..k</sub> ${binomHTML("k", "r")}) = 2 &middot; 2<sup>k</sup> = <strong>2<sup>k+1</sup></strong> &nbsp;&#9724;
+                </div>
+                <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--emerald);">
+                  <strong>Row ${k + 1} Evaluation:</strong><br/>
+                  ${rowKp1.join(" + ")} = 2 &times; ${sumK} = <strong style="color:var(--emerald)">${sumKp1} = 2<sup>${k + 1}</sup></strong>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          const rFixed = 2;
+          const nVal = Math.max(rFixed, k + 1);
+          const shaftTerms = [];
+          for (let i = rFixed; i <= nVal; i++) shaftTerms.push(pascalBig[i][rFixed].toString());
+          const prevSum = pascalBig[nVal][rFixed + 1].toString();
+          const lastTerm = pascalBig[nVal][rFixed].toString();
+          const nextSum = pascalBig[nVal + 1][rFixed + 1].toString();
+
+          theoryHub.innerHTML = `
+            <div class="proof-box">
+              <div class="companion-header">
+                <span class="companion-title">Proof by Induction: The Hockey-Stick Identity</span>
+                <div class="control-group">
+                  <button class="pill-btn" onclick="setIndProofType('rowsum')"><span>Row Sum = 2<sup>n</sup></span></button>
+                  <button class="pill-btn active" onclick="setIndProofType('hockey')"><span>Hockey-Stick Identity</span></button>
+                  <span class="control-label" style="margin-left:0.4rem">Step k:</span>
+                  <input type="range" min="2" max="7" value="${nVal}" style="width:85px" oninput="setIndStepN(Number(this.value) - 1)" />
+                  <span class="number-badge">k = ${nVal}</span>
+                </div>
+              </div>
+
+              <div class="proof-step">
+                <div>
+                  <strong>1. Proposition P(n):</strong><br/>
+                  For a fixed column <em>r &ge; 0</em> and any integer <em>n &ge; r</em>:<br/>
+                  &Sigma;<sub>i=r..n</sub> ${binomHTML("i", "r")} = ${binomHTML("n + 1", "r + 1")}
+                </div>
+                <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                  <strong>Example with r = 2, n = ${nVal}:</strong><br/>
+                  ${shaftTerms.join(" + ")} = <strong>${nextSum}</strong> = ${binomHTML(nVal + 1, 3)}
+                </div>
+              </div>
+
+              <div class="proof-step">
+                <div>
+                  <strong>2. Base Case (n = r):</strong><br/>
+                  When <em>n = r</em>, LHS = ${binomHTML("r", "r")} = 1, and RHS = ${binomHTML("r + 1", "r + 1")} = 1.<br/>
+                  Thus <strong>P(r) holds</strong>.
+                </div>
+                <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                  <strong>Base Check (n = 2, r = 2):</strong> ${binomHTML(2, 2)} = 1 = ${binomHTML(3, 3)} &#10003;
+                </div>
+              </div>
+
+              <div class="proof-step">
+                <div>
+                  <strong>3. Inductive Hypothesis:</strong><br/>
+                  Assume <strong>P(k)</strong> is true for some integer <em>k &ge; r</em>:<br/>
+                  &Sigma;<sub>i=r..k</sub> ${binomHTML("i", "r")} = ${binomHTML("k + 1", "r + 1")}
+                </div>
+                <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                  <strong>Assumed for k = ${nVal - 1}:</strong><br/>
+                  Sum up to Row ${nVal - 1} = <strong>${prevSum}</strong> = ${binomHTML(nVal, 3)}
+                </div>
+              </div>
+
+              <div class="proof-step active-step">
+                <div>
+                  <strong>4. Inductive Step (Prove P(k + 1)):</strong><br/>
+                  Separate the final term <em>i = k + 1</em> and apply the Inductive Hypothesis, then Pascal's Addition Rule:<br/>
+                  &Sigma;<sub>i=r..k+1</sub> ${binomHTML("i", "r")} = (&Sigma;<sub>i=r..k</sub> ${binomHTML("i", "r")}) + ${binomHTML("k + 1", "r")}<br/>
+                  = ${binomHTML("k + 1", "r + 1")} + ${binomHTML("k + 1", "r")} = <strong>${binomHTML("k + 2", "r + 1")}</strong> &nbsp;&#9724;
+                </div>
+                <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--emerald);">
+                  <strong>Numeric Step (k = ${nVal - 1} &rarr; ${nVal}):</strong><br/>
+                  ${prevSum} + ${lastTerm} = <strong style="color:var(--emerald)">${nextSum} = ${binomHTML(nVal + 1, 3)}</strong>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      } else if (state.theoryTopic === "combinatorics") {
+        const n = state.combN;
+        const r = Math.min(state.combR, n);
+        const items = ["A", "B", "C", "D", "E", "F"].slice(0, n);
+        const subsets = [];
+        function generateSubsets(start, current) {
+          if (current.length === r) {
+            subsets.push(`{${current.join(",")}}`);
+            return;
+          }
+          for (let i = start; i < items.length; i++) {
+            current.push(items[i]);
+            generateSubsets(i + 1, current);
+            current.pop();
+          }
+        }
+        generateSubsets(0, []);
+
+        theoryHub.innerHTML = `
+          <div class="proof-box">
+            <div class="companion-header">
+              <span class="companion-title">Combinatorics: Why Row n, Position r Counts Subsets ${binomHTML(n, r)}</span>
+              <div class="control-group">
+                <span>Set size n:</span>
+                <input type="range" min="1" max="6" value="${n}" style="width:90px" oninput="setCombParams(this.value, ${r})" />
+                <span class="number-badge">${n}</span>
+                <span>Choose r:</span>
+                <input type="range" min="0" max="${n}" value="${r}" style="width:90px" oninput="setCombParams(${n}, this.value)" />
+                <span class="number-badge">${r}</span>
+              </div>
+            </div>
+            <p style="font-size:0.9rem;color:var(--text-muted);">
+              Suppose you have a set of <strong>${n}</strong> distinct items: <strong>{${items.join(", ")}}</strong>. How many different ways can you choose <strong>${r}</strong> of them (where order does not matter)?
+              Notice why Pascal's addition rule works: either your selection <em>includes</em> the newest item <strong>${items[n - 1]}</strong> (leaving ${binomHTML(n - 1, Math.max(0, r - 1))} ways to pick the rest) or it <em>excludes</em> <strong>${items[n - 1]}</strong> (leaving ${binomHTML(n - 1, Math.min(n - 1, r))} ways)!
+            </p>
+            <div class="equation-box">
+              <span>${binomHTML(n, r)} = ${fracHTML(`${n}!`, `${r}!(${n} - ${r})!`)} = <span class="chip-emerald">${subsets.length} combinations</span></span>
+            </div>
+            <div class="subset-chips">
+              ${subsets.map((s) => `<span class="subset-chip">${s}</span>`).join("")}
+            </div>
+          </div>
+        `;
+      } else if (state.theoryTopic === "applications") {
+        theoryHub.innerHTML = `
+          <div class="theory-grid">
+            <div class="theory-card">
+              <h3>📐 1. Algebra &amp; Fast Polynomial Expansion</h3>
+              <p>Expanding high powers like <strong>(x + y)<sup>7</sup></strong> by hand would produce 128 terms before collecting like terms. Reading Row 7 (<code>1, 7, 21, 35, 35, 21, 7, 1</code>) gives the complete expansion immediately:</p>
+              <div class="equation-box" style="font-size:0.82rem;line-height:1.7;">
+                <span>(x + y)<sup>7</sup> = <span class="exp-coeff">1</span>x<sup>7</sup> + <span class="exp-coeff">7</span>x<sup>6</sup>y + <span class="exp-coeff">21</span>x<sup>5</sup>y<sup>2</sup> + <span class="exp-coeff">35</span>x<sup>4</sup>y<sup>3</sup> + <span class="exp-coeff">35</span>x<sup>3</sup>y<sup>4</sup> + <span class="exp-coeff">21</span>x<sup>2</sup>y<sup>5</sup> + <span class="exp-coeff">7</span>xy<sup>6</sup> + <span class="exp-coeff">1</span>y<sup>7</sup></span>
+              </div>
+              <p>In calculus and numerical approximation, keeping the first two terms <strong>(1 + x)<sup>n</sup> &approx; 1 + nx</strong> (for small <em>x</em>) comes straight from the first two entries of Row <em>n</em>.</p>
+            </div>
+
+            <div class="theory-card">
+              <h3>🎲 2. Probability &amp; Coin Tosses</h3>
+              <p>If you toss a fair coin <strong>n</strong> times, there are <strong>2<sup>n</sup></strong> equally likely outcomes. Row <strong>n</strong> of Pascal's triangle counts the exact number of ways to get <strong>0, 1, 2, …, n</strong> heads.</p>
+              <div class="equation-box"><span>4 tosses &rarr; 1, 4, 6, 4, 1 (out of 16)</span></div>
+              <p>For example, the probability of getting exactly 2 heads in 4 tosses is <strong>6 / 16 = 37.5%</strong>. This generalises directly to the <strong>Binomial Distribution</strong> in statistics and genetics.</p>
+            </div>
+
+            <div class="theory-card">
+              <h3>🗺️ 3. City Grid Paths (Taxicab Geometry)</h3>
+              <p>Imagine walking from the top-left corner of a rectangular street grid to any intersection, moving only <strong>Down</strong> or <strong>Right</strong>.</p>
+              <div class="equation-box"><span>Paths to (row n, col r) = ${binomHTML("n", "r")}</span></div>
+              <p>Because you can only arrive at an intersection from the street directly above or the street directly to the left, the number of shortest paths adds together identically to Pascal's triangle tilted by 45°!</p>
+            </div>
+
+            <div class="theory-card">
+              <h3>❄️ 4. Fractals &amp; Cellular Automata</h3>
+              <p>Colouring Pascal's triangle modulo a prime <strong>p</strong> generates self-similar fractals governed by <strong>Lucas's Theorem</strong>. For <strong>p = 2</strong>, odd numbers form the <strong>Sierpiński Triangle</strong>—the exact same pattern produced by Wolfram's <strong>Rule 90</strong> cellular automaton.</p>
+            </div>
+          </div>
+        `;
+      } else if (state.theoryTopic === "history") {
+        theoryHub.innerHTML = `
+          <div class="proof-box">
+            <h3 style="font-size:1.05rem;">🌍 A Shared Global Discovery</h3>
+            <p style="font-size:0.9rem;color:var(--text-muted);">Although named after French mathematician Blaise Pascal in the Western world, mathematicians across Asia and the Middle East discovered and used the triangle centuries earlier:</p>
+            <ul class="timeline-list">
+              <li><strong>~200 BCE — India (Pingala):</strong> Described the triangle as <em>Meru Prastāra</em> ("Staircase of Mount Meru") to count combinations of short and long syllables in Sanskrit poetry.</li>
+              <li><strong>~950–1100 CE — Persia (Al-Karaji &amp; Omar Khayyam):</strong> Used the triangle to compute binomial expansions and extract <em>n</em>-th roots; in Iran it is recognised as the <strong>Khayyam–Pascal Triangle</strong>.</li>
+              <li><strong>11th–13th Century — China (Jia Xian &amp; Yang Hui):</strong> Jia Xian used it to extract square and cube roots, and Yang Hui published it in 1261; in China it is called <strong>Yang Hui's Triangle</strong>.</li>
+              <li><strong>1654 — France (Blaise Pascal):</strong> Published <em>Traité du triangle arithmétique</em>, systematically proving its properties (including the Hockey-Stick identity) and applying it to probability theory with Pierre de Fermat.</li>
+            </ul>
+          </div>
+        `;
+      }
+    }
+
+    // ==========================================
+    // 9. INTERACTION HANDLERS
+    // ==========================================
+    function syncInputs(val, otherId) {
+      const other = document.getElementById(otherId);
+      if (other && other.value !== val) {
+        other.value = val;
+      }
+    }
+
+    function handleCellHover(r, k) {
+      if (state.mode === "build" && state.buildSubMode === "explore") {
+        state.hoveredCell = { r, k };
+        renderInsight();
+        renderTriangleDOM();
+      }
+    }
+
+    function setNewDiagEndpoint(r, k) {
+      const clampedR = Math.max(1, Math.min(7, r));
+      const clampedK = Math.max(0, Math.min(clampedR, k));
+      state.diagEndpoint = { r: clampedR, k: clampedK };
+      if (clampedK === 0) state.diagDir = "right";
+      else if (clampedK === clampedR) state.diagDir = "left";
+      state.diagFoundMatches = new Set();
+      state.diagSumVerified = false;
+      state.hockeyShownForCurrent = false;
+      state.diagMessage = "";
+      renderAll();
+    }
+
+    function pickRandomEndpoint() {
+      const candidates = [
+        { r: 3, k: 0, dir: "right" },
+        { r: 4, k: 1, dir: "right" },
+        { r: 4, k: 2, dir: "right" },
+        { r: 5, k: 2, dir: "left" },
+        { r: 5, k: 1, dir: "right" },
+        { r: 6, k: 3, dir: "left" },
+        { r: 6, k: 2, dir: "right" },
+        { r: 7, k: 2, dir: "left" },
+        { r: 3, k: 3, dir: "left" }
+      ];
+      const filtered = candidates.filter(
+        (c) => c.r !== state.diagEndpoint.r || c.k !== state.diagEndpoint.k || c.dir !== state.diagDir
+      );
+      const next = filtered[Math.floor(Math.random() * filtered.length)];
+      state.diagEndpoint = { r: next.r, k: next.k };
+      state.diagDir = next.dir;
+      state.diagFoundMatches = new Set();
+      state.diagSumVerified = false;
+      state.hockeyShownForCurrent = false;
+      state.diagMessage = "";
+      renderAll();
+    }
+
+    function handleCellClick(r, k) {
+      if (state.mode === "build" && state.buildSubMode === "challenge") {
+        const key = `${r},${k}`;
+        if (!state.revealedSet.has(key)) {
+          if (isCellSolvable(r, k)) {
+            state.activeQuizCell = { r, k };
+            state.buildMessage = "";
+            renderInsight();
+            renderTriangleDOM();
+          } else {
+            state.buildMessage = "Solve the missing parent cell(s) directly above this space first!";
+            renderInsight();
+            const el = triangleGrid.querySelector(`.cell[data-r="${r}"][data-k="${k}"]`);
+            if (el) {
+              el.classList.remove("shake");
+              void el.offsetWidth;
+              el.classList.add("shake");
+            }
+          }
+        }
+      } else if (state.mode === "patterns" && state.patternType === "hockey") {
+        const { chain, endpoint, turningCell, targetVal, allMatches } = getDiagonalAnalysis();
+        const clickedVal = pascalBig[r][k];
+        const key = `${r},${k}`;
+        const allAlreadyFound = state.diagFoundMatches.size >= allMatches.length;
+
+        if (allAlreadyFound) {
+          if (r >= 1 && r <= 7) {
+            setNewDiagEndpoint(r, k);
+          } else {
+            state.diagMessage = "Click any number in Rows 1–7 to start a new diagonal endpoint!";
+            renderInsight();
+          }
+          return;
+        }
+
+        if (clickedVal === targetVal) {
+          if (!state.diagFoundMatches.has(key)) {
+            state.diagFoundMatches.add(key);
+            state.diagMessage = "";
+            if (state.diagFoundMatches.size >= allMatches.length) {
+              state.diagCompletedCount += 1;
+              state.diagLog.push({
+                terms: chain.map((c) => pascalBig[c.r][c.k].toString()),
+                sum: targetVal.toString(),
+                endpointR: endpoint.r,
+                turningRow: turningCell.r
+              });
+            }
+            renderAll();
+          } else {
+            state.diagMessage = `You already highlighted ${targetVal} at Row ${r}, Pos ${k}! Find the remaining occurrence.`;
+            renderInsight();
+          }
+        } else {
+          if (r >= 1 && r <= 7) {
+            setNewDiagEndpoint(r, k);
+          } else {
+            state.diagMessage = `${clickedVal} does not equal the diagonal sum. Click any number in Rows 1–7 to move the endpoint!`;
+            renderInsight();
+          }
+        }
+      } else if (
+        state.mode === "patterns" &&
+        (state.patternType === "whole" ||
+          state.patternType === "triangular" ||
+          state.patternType === "tetrahedral")
+      ) {
+        const colouredHockey = getColouredPatternHockey();
+        if (
+          colouredHockey &&
+          k === colouredHockey.diagCol &&
+          r >= colouredHockey.diagCol &&
+          r <= colouredHockey.diagCol + 5
+        ) {
+          state.geoStep = r - colouredHockey.diagCol + 1;
+          renderAll();
+        }
+      } else if (
+        state.mode === "sums" &&
+        (state.sumType === "powers2" || state.sumType === "altsum" || state.sumType === "binomial")
+      ) {
+        state.selectedRow = r;
+        state.rowSumFeedback = "";
+        state.altSumFeedback = "";
+        renderInsight();
+        renderTriangleDOM();
+      } else if (state.mode === "sums" && state.sumType === "fibonacci") {
+        const m = Math.min(8, r + k);
+        state.fibIndex = m;
+        state.fibSeedCell = { r, k };
+        state.fibFeedback = "";
+        renderAll();
+      } else if (state.mode === "fractals" && !state.zoomUnlocked) {
+        const val = pascalBig[r][k];
+        const modBig = BigInt(state.divisor);
+        const rem = val % modBig;
+        const key = `${r},${k}`;
+
+        if (rem === 0n) {
+          state.userFoundMultiples.add(key);
+          state.fractalFeedback = null;
+          const target = getDiscoveryTargetCount(state.divisor);
+          if (state.userFoundMultiples.size >= target) {
+            state.zoomUnlocked = true;
+            state.fractalFeedback = {
+              type: "success",
+              text: `Awesome! You found ${target} multiples of ${state.divisor}. Use the Zoom buttons above (up to 512 rows!) to watch the fractal emerge!`
+            };
+          }
+          renderAll();
+        } else {
+          state.fractalFeedback = {
+            type: "warn",
+            text: `${val} is not a multiple of ${state.divisor} (${val} ÷ ${state.divisor} leaves remainder ${rem}).`
+          };
+          renderInsight();
+          const el = triangleGrid.querySelector(`.cell[data-r="${r}"][data-k="${k}"]`);
+          if (el) {
+            el.classList.remove("shake");
+            void el.offsetWidth;
+            el.classList.add("shake");
+          }
+        }
+      }
+    }
+
+    function submitOptionalDiagSum(e) {
+      e.preventDefault();
+      const inp = document.getElementById("diagSumInput");
+      const raw = inp ? inp.value.trim() : "";
+      if (!raw) return;
+
+      let userVal;
+      try {
+        userVal = BigInt(raw);
+      } catch {
+        return;
+      }
+
+      const { targetVal } = getDiagonalAnalysis();
+      if (userVal === targetVal) {
+        state.diagSumVerified = true;
+        state.diagMessage = "";
+        renderInsight();
+      } else {
+        state.diagMessage = `Not quite — add the highlighted blue numbers again!`;
+        renderInsight();
+      }
+    }
+
+    function showHockeyStickNow() {
+      state.hockeyShownForCurrent = true;
+      renderAll();
+    }
+
+    function setDiagDir(dir) {
+      state.diagDir = dir;
+      state.diagFoundMatches = new Set();
+      state.diagSumVerified = false;
+      state.hockeyShownForCurrent = false;
+      state.diagMessage = "";
+      renderAll();
+    }
+
+    function submitInlineRowSum(r) {
+      const inp = document.getElementById(`rowSumInput-${r}`);
+      const raw = inp ? inp.value.trim() : "";
+      if (!raw) return;
+
+      let userVal;
+      try {
+        userVal = BigInt(raw);
+      } catch {
+        return;
+      }
+
+      const correctVal = 1n << BigInt(r);
+      if (userVal === correctVal) {
+        state.solvedRowSums.add(r);
+        state.rowSumFeedback = "";
+        let nextRow = null;
+        for (let nr = r + 1; nr <= 8; nr++) {
+          if (!state.solvedRowSums.has(nr)) {
+            nextRow = nr;
+            break;
+          }
+        }
+        if (nextRow === null) {
+          for (let nr = 3; nr <= 8; nr++) {
+            if (!state.solvedRowSums.has(nr)) {
+              nextRow = nr;
+              break;
+            }
+          }
+        }
+        if (nextRow !== null) {
+          state.selectedRow = nextRow;
+        }
+        renderAll();
+      } else {
+        state.rowSumFeedback = `Not quite — add all entries across Row ${r} again!`;
+        renderInsight();
+        if (inp) {
+          inp.value = "";
+          inp.focus();
+        }
+      }
+    }
+
+    function revealRowSumPattern() {
+      state.rowSumPatternRevealed = true;
+      renderAll();
+    }
+
+    function submitInlineAltSum(r) {
+      const inp = document.getElementById(`altSumInput-${r}`);
+      const raw = inp ? inp.value.trim() : "";
+      if (raw === "") return;
+
+      const userVal = Number(raw);
+      const correctVal = r === 0 ? 1 : 0;
+      if (userVal === correctVal) {
+        state.solvedAltSums.add(r);
+        state.altSumFeedback = "";
+        let nextRow = null;
+        for (let nr = r + 1; nr <= 8; nr++) {
+          if (!state.solvedAltSums.has(nr)) {
+            nextRow = nr;
+            break;
+          }
+        }
+        if (nextRow === null) {
+          for (let nr = 3; nr <= 8; nr++) {
+            if (!state.solvedAltSums.has(nr)) {
+              nextRow = nr;
+              break;
+            }
+          }
+        }
+        if (nextRow !== null) {
+          state.selectedRow = nextRow;
+        }
+        renderAll();
+      } else {
+        state.altSumFeedback = `Not quite — alternate subtracting and adding from left to right across Row ${r}!`;
+        renderInsight();
+        if (inp) {
+          inp.value = "";
+          inp.focus();
+        }
+      }
+    }
+
+    function revealAltSumPattern() {
+      state.altSumPatternRevealed = true;
+      renderAll();
+    }
+
+    function resetRowSumChallenge() {
+      if (state.sumType === "powers2") {
+        state.solvedRowSums = new Set([0, 1, 2]);
+        state.rowSumFeedback = "";
+        state.rowSumPatternRevealed = false;
+        state.selectedRow = 3;
+      } else {
+        state.solvedAltSums = new Set([0, 1, 2]);
+        state.altSumFeedback = "";
+        state.altSumPatternRevealed = false;
+        state.selectedRow = 3;
+      }
+      renderAll();
+    }
+
+    function submitFibSum(m) {
+      const inp = document.getElementById(`fibInput-${m}`);
+      const raw = inp ? inp.value.trim() : "";
+      if (!raw) return;
+
+      let userVal;
+      try {
+        userVal = BigInt(raw);
+      } catch {
+        return;
+      }
+
+      const cells = getFibonacciCells(m);
+      const correctVal = cells.reduce((acc, c) => acc + pascalBig[c.r][c.k], 0n);
+
+      if (userVal === correctVal) {
+        state.solvedFibDiags.add(m);
+        state.fibFeedback = "";
+        let nextM = null;
+        for (let nm = m + 1; nm <= 8; nm++) {
+          if (!state.solvedFibDiags.has(nm)) {
+            nextM = nm;
+            break;
+          }
+        }
+        if (nextM === null) {
+          for (let nm = 2; nm <= 8; nm++) {
+            if (!state.solvedFibDiags.has(nm)) {
+              nextM = nm;
+              break;
+            }
+          }
+        }
+        if (nextM !== null) {
+          state.fibIndex = nextM;
+          const nextCells = getFibonacciCells(nextM);
+          state.fibSeedCell = nextCells[0] || { r: 0, k: 0 };
+        }
+        renderAll();
+      } else {
+        state.fibFeedback = `Not quite — add the highlighted rose numbers along Diagonal ${m + 1} again!`;
+        renderInsight();
+        if (inp) {
+          inp.value = "";
+          inp.focus();
+        }
+      }
+    }
+
+    function selectFibDiagonal(m) {
+      state.fibIndex = m;
+      const cells = getFibonacciCells(m);
+      state.fibSeedCell = cells[0] || { r: 0, k: 0 };
+      state.fibFeedback = "";
+      renderAll();
+    }
+
+    function revealAllFibDiags() {
+      for (let m = 0; m <= 8; m++) state.solvedFibDiags.add(m);
+      state.fibFeedback = "";
+      renderAll();
+    }
+
+    function resetFibDiags() {
+      state.solvedFibDiags = new Set([0, 1]);
+      state.fibIndex = 2;
+      state.fibSeedCell = { r: 2, k: 0 };
+      state.fibFeedback = "";
+      renderAll();
+    }
+
+    function jumpToHockeyInduction() {
+      document.querySelectorAll(".tab-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.mode === "theory");
+      });
+      state.mode = "theory";
+      state.theoryTopic = "induction";
+      state.indProofType = "hockey";
+      renderAll();
+    }
+
+    function submitQuizAnswer(e, r, k, sourceInputId) {
+      e.preventDefault();
+      const input = document.getElementById(sourceInputId) || document.getElementById("bannerQuizInput");
+      const raw = input ? input.value.trim() : "";
+      if (!raw) return;
+
+      let userVal;
+      try {
+        userVal = BigInt(raw);
+      } catch {
+        return;
+      }
+
+      const correctVal = pascalBig[r][k];
+      if (userVal === correctVal) {
+        state.revealedSet.add(`${r},${k}`);
+        state.buildMessage = "";
+        advanceNextQuizCell();
+        renderInsight();
+        renderTriangleDOM();
+      } else {
+        const leftP = pascalBig[r - 1][k - 1];
+        const rightP = pascalBig[r - 1][k];
+        state.buildMessage = `Not quite — add ${leftP} + ${rightP} and try again!`;
+        renderInsight();
+        const cellInp = document.getElementById("cellQuizInput");
+        const bannerInp = document.getElementById("bannerQuizInput");
+        if (cellInp) {
+          cellInp.value = "";
+          cellInp.focus();
+        }
+        if (bannerInp) {
+          bannerInp.value = "";
+        }
+      }
+    }
+
+    function solveNextCell() {
+      if (!state.activeQuizCell) return;
+      const { r, k } = state.activeQuizCell;
+      state.revealedSet.add(`${r},${k}`);
+      state.buildMessage = "";
+      advanceNextQuizCell();
+      renderInsight();
+      renderTriangleDOM();
+    }
+
+    function advanceNextQuizCell() {
+      for (let r = 2; r < state.rows; r++) {
+        for (let k = 1; k < r; k++) {
+          if (isCellSolvable(r, k)) {
+            state.activeQuizCell = { r, k };
+            return;
+          }
+        }
+      }
+      state.activeQuizCell = null;
+    }
+
+    function resetChallenge() {
+      state.revealedSet = createInitialRevealedSet(15);
+      state.activeQuizCell = { r: 2, k: 1 };
+      state.buildMessage = "";
+      renderInsight();
+      renderTriangleDOM();
+    }
+
+    function setBuildSubMode(sub) {
+      state.buildSubMode = sub;
+      state.buildMessage = "";
+      if (sub === "challenge" && !state.activeQuizCell) {
+        advanceNextQuizCell();
+      }
+      renderAll();
+    }
+
+    function toggleBinomLabels() {
+      state.showBinomLabels = !state.showBinomLabels;
+      renderAll();
+    }
+
+    function setRows(val) {
+      state.rows = Number(val);
+      if (state.selectedRow >= state.rows) state.selectedRow = state.rows - 1;
+      if (state.hoveredCell.r >= state.rows) state.hoveredCell = { r: state.rows - 1, k: 1 };
+      if (state.buildSubMode === "challenge") {
+        if (!state.activeQuizCell || state.activeQuizCell.r >= state.rows) {
+          advanceNextQuizCell();
+        }
+      }
+      renderAll();
+    }
+
+    function setPattern(type) {
+      state.patternType = type;
+      state.diagMessage = "";
+      if (type === "whole" || type === "triangular") state.geoStep = 5;
+      if (type === "tetrahedral") state.geoStep = 4;
+      renderAll();
+    }
+
+    function setGeoStep(val) {
+      state.geoStep = Number(val);
+      renderInsight();
+      renderTriangleDOM();
+    }
+
+    function setTetraExplode(val) {
+      state.tetraExplode = Number(val);
+      const canvas = document.getElementById("tetraCanvas");
+      if (canvas) drawTetraScene(canvas);
+    }
+
+    function setSumType(type) {
+      state.sumType = type;
+      state.rowSumFeedback = "";
+      state.altSumFeedback = "";
+      state.fibFeedback = "";
+      if ((type === "powers2" || type === "altsum") && state.selectedRow < 3) {
+        state.selectedRow = 3;
+      }
+      renderAll();
+    }
+
+    function setBinomEval(mode) {
+      state.binomEvalMode = mode;
+      renderCompanionPanel();
+    }
+
+    function selectRow(r) {
+      state.selectedRow = r;
+      state.rowSumFeedback = "";
+      state.altSumFeedback = "";
+      renderAll();
+    }
+
+    function setDivisor(d) {
+      state.divisor = Number(d);
+      state.userFoundMultiples = new Set();
+      state.fractalRows = 16;
+
+      const availableIn16 = getAllMultiplesInRows(state.divisor, 16).length;
+      if (availableIn16 === 0) {
+        state.zoomUnlocked = true;
+        state.fractalRows = 32;
+        state.fractalFeedback = {
+          type: "success",
+          text: `No multiples of ${state.divisor} appear in the first 16 rows—zoomed out to 32 rows so you can see where they first emerge!`
+        };
+      } else {
+        state.zoomUnlocked = false;
+        state.fractalFeedback = null;
+      }
+      renderAll();
+    }
+
+    function unlockFractalNow() {
+      state.zoomUnlocked = true;
+      state.fractalFeedback = null;
+      renderAll();
+    }
+
+    function setColourMode(cm) {
+      state.colourMode = cm;
+      renderAll();
+    }
+
+    function setFractalRows(z) {
+      if (!state.zoomUnlocked && Number(z) > 16) return;
+      state.fractalRows = Number(z);
+      renderAll();
+    }
+
+    function setTheoryTopic(topic) {
+      state.theoryTopic = topic;
+      renderAll();
+    }
+
+    function setProofParams(n, r) {
+      state.proofN = Number(n);
+      state.proofR = Math.min(Number(r), state.proofN - 1);
+      renderTheoryHub();
+    }
+
+    function setIndProofType(t) {
+      state.indProofType = t;
+      renderTheoryHub();
+    }
+
+    function setIndStepN(val) {
+      state.indStepN = Number(val);
+      renderTheoryHub();
+    }
+
+    function setCombParams(n, r) {
+      state.combN = Number(n);
+      state.combR = Math.min(Number(r), state.combN);
+      renderTheoryHub();
+    }
+
+    // ==========================================
+    // 10. MASTER RENDER ORCHESTRATOR
+    // ==========================================
+    function renderAll() {
+      renderControls();
+      renderInsight();
+
+      const isFractal = state.mode === "fractals";
+      const isTheory = state.mode === "theory";
+      stageCard.classList.toggle("fractal-dark", isFractal);
+
+      triangleWrapper.style.display = "none";
+      companionSlot.style.display = "none";
+      canvasContainer.style.display = "none";
+      theoryHub.style.display = "none";
+
+      if (isTheory) {
+        theoryHub.style.display = "flex";
+        renderTheoryHub();
+      } else if (isFractal && state.fractalRows > 16) {
+        canvasContainer.style.display = "flex";
+        renderFractalCanvas();
+      } else {
+        triangleWrapper.style.display = "inline-flex";
+        companionSlot.style.display = "flex";
+        renderTriangleDOM();
+      }
+    }
+
+    window.addEventListener("resize", () => {
+      if (state.mode === "fractals" && state.fractalRows > 16) {
+        renderFractalCanvas();
+      } else if (state.mode !== "theory") {
+        renderFibonacciDiagonalOverlay();
+        drawSvgConnectors();
+      }
+    });
+
+    // Initial boot
+    renderAll();
+  </script>
+</body>
+</html>
