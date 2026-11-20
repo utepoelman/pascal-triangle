@@ -1129,20 +1129,24 @@
     .frac {
       display: inline-flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
+      text-align: center;
       vertical-align: middle;
       margin: 0 3px;
       font-size: 0.9em;
       line-height: 1.15;
     }
 
+    /* Bar spans the full width of the wider of numerator / denominator */
     .frac-num {
       border-bottom: 1.5px solid currentColor;
-      padding: 0 4px 2px;
+      padding: 0 5px 2px;
+      white-space: nowrap;
     }
 
     .frac-den {
-      padding: 2px 4px 0;
+      padding: 2px 5px 0;
+      white-space: nowrap;
     }
 
     /* Tab 5: Theory, Proof & Applications Hub */
@@ -1346,6 +1350,215 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ==========================================
+       WORKSHEET GENERATOR (screen + print)
+       ========================================== */
+    .ws-launch {
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--violet));
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 0.55rem 0.95rem;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+      transition: transform 0.15s ease;
+    }
+    .ws-launch:hover { transform: translateY(-1px); }
+
+    #wsOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #cbd5e1;
+      display: none;
+      overflow: hidden;
+    }
+    body.ws-open #wsOverlay { display: block; }
+    body.ws-open { overflow: hidden; }
+
+    .ws-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      height: 100vh;
+    }
+    .ws-panel {
+      overflow: auto;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1rem 1.1rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .ws-panel h2 { font-size: 1.05rem; letter-spacing: -0.01em; }
+    .ws-panel .ws-sub { font-size: 0.78rem; color: var(--text-muted); }
+    .ws-btn-row { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .ws-btn {
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.45rem 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .ws-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .ws-btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .ws-btn.primary:hover { color: #fff; filter: brightness(1.08); }
+    .ws-opt {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-alt);
+      padding: 0.55rem 0.7rem;
+      font-size: 0.82rem;
+    }
+    .ws-opt-head { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; cursor: pointer; }
+    .ws-opt-body { margin-top: 0.45rem; display: flex; flex-direction: column; gap: 0.35rem; color: var(--text-muted); }
+    .ws-opt-body label { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+    .ws-opt-body input[type="range"] { flex: 1 1 90px; }
+    .ws-opt-body output { font-weight: 800; color: var(--primary); min-width: 1.4rem; }
+    .ws-opt-body select { font-size: 0.8rem; padding: 0.15rem 0.3rem; border-radius: 6px; border: 1px solid var(--border); }
+    .ws-divs { display: flex; flex-wrap: wrap; gap: 0.3rem 0.6rem; }
+    .ws-divs label { gap: 0.2rem; }
+
+    .ws-preview { overflow: auto; padding: 1rem; }
+    .ws-sheet {
+      background: #fff;
+      color: #000;
+      width: 210mm;
+      max-width: 100%;
+      margin: 0 auto 1.2rem;
+      padding: 15mm;
+      box-shadow: var(--shadow-md);
+      font-size: 11pt;
+      line-height: 1.35;
+    }
+    .ws-empty { text-align: center; color: var(--text-muted); padding: 3rem 1rem; }
+
+    .ws-head {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 10px; gap: 12px; flex-wrap: wrap;
+    }
+    .ws-head h1 { font-size: 17pt; letter-spacing: -0.01em; }
+    .ws-head .ws-name { font-size: 10.5pt; }
+    .ws-head .ws-name span { display: inline-block; border-bottom: 1px solid #000; width: 5cm; margin: 0 6px 0 4px; }
+    .ws-head .ws-name span.short { width: 2.6cm; }
+    .ws-key-tag { font-size: 10pt; font-weight: 700; border: 1.5px solid #000; padding: 1px 8px; border-radius: 4px; }
+
+    .ws-act { margin-bottom: 9mm; }
+    .ws-act h2 {
+      font-size: 13pt; margin: 0 0 4px; display: flex; align-items: center; gap: 8px;
+      break-after: avoid; page-break-after: avoid;
+    }
+    .ws-act h2 .ws-num {
+      background: #000; color: #fff; border-radius: 50%; width: 22px; height: 22px;
+      display: inline-grid; place-items: center; font-size: 10.5pt; flex-shrink: 0;
+    }
+    .ws-instr { font-size: 10.5pt; margin-bottom: 6px; }
+    .ws-block { break-inside: avoid; page-break-inside: avoid; }
+
+    .ws-rule {
+      display: flex; align-items: center; gap: 14px; border: 1.5px solid #000; border-radius: 6px;
+      padding: 6px 10px; margin: 6px 0 8px; font-size: 10.5pt; break-inside: avoid;
+    }
+    .ws-rule-diag { display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; }
+    .ws-rule-diag .top { display: flex; gap: 2px; }
+    .ws-rule-diag span {
+      border: 1px solid #000; border-radius: 3px; min-width: 0.95cm; height: 0.7cm;
+      display: inline-flex; align-items: center; justify-content: center; font-size: 10pt; font-weight: 700; padding: 0 3px;
+    }
+    .ws-rule-diag .res { background: #e5e7eb; }
+
+    /* Triangles */
+    .ws-tri { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 6px 0; break-inside: avoid; page-break-inside: avoid; }
+    .ws-tri-row { display: flex; justify-content: center; gap: 2px; position: relative; width: 100%; }
+    .ws-rl { position: absolute; left: 0; top: 50%; transform: translateY(-50%); font-size: 7.5pt; color: #555; }
+    .ws-cell {
+      width: var(--cw); height: var(--ch); border: 1px solid #222; border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--fs, 10pt); font-weight: 600; background: #fff; flex-shrink: 0;
+    }
+    .ws-cell.given { background: #e5e7eb; }
+    .ws-cell.ans { color: #b91c1c; background: #fff7ed; }
+    .ws-cell.mult { background: #fcd34d; }
+    .ws-tri.mini { gap: 1px; margin: 4px 0; }
+    .ws-tri.mini .ws-tri-row { gap: 1px; }
+    .ws-tri.mini .ws-cell { border: 0.5px solid #888; border-radius: 2px; font-weight: 500; }
+    .ws-cell.stick { background: #fcd34d; border: 1.5px solid #000 !important; font-weight: 800; }
+    .ws-cell.blade { background: #fda4af; border: 2px solid #000 !important; font-weight: 800; }
+
+    /* Tables */
+    .ws-table { border-collapse: collapse; width: 100%; margin: 4px 0 6px; }
+    .ws-table th, .ws-table td { border: 1px solid #222; padding: 4px 8px; text-align: center; font-size: 10.5pt; }
+    .ws-table th { background: #e5e7eb; }
+    .ws-table td.ws-blank { min-width: 2.4cm; height: 0.95cm; }
+    .ws-table td.ws-ans { color: #b91c1c; font-weight: 800; }
+    .ws-table tr.ws-example td { background: #f3f4f6; }
+    .ws-table td.left { text-align: left; }
+    .ws-table td.ws-ex-ans { font-weight: 700; }
+    .ws-box { display: inline-block; width: 0.7cm; height: 0.55cm; border: 1px solid #222; vertical-align: baseline; }
+    .ws-lines { margin-top: 6px; }
+    .ws-lines .ws-lineq { margin: 6px 0 2px; }
+    .ws-lines .ws-wline { border-bottom: 1px solid #000; height: 0.8cm; }
+    .ws-fill { display: inline-block; border-bottom: 1px solid #000; min-width: 2.4cm; text-align: center; }
+    .ws-fill.ans { color: #b91c1c; font-weight: 800; border-bottom-color: #b91c1c; }
+    .ws-red { color: #b91c1c; font-weight: 700; }
+
+    /* Hockey */
+    .ws-hgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .ws-hbox { border: 1px solid #999; border-radius: 6px; padding: 6px 8px; break-inside: avoid; page-break-inside: avoid; }
+    .ws-hbox h3 { font-size: 10.5pt; margin-bottom: 2px; }
+    .ws-hline { margin-top: 4px; font-size: 10.5pt; }
+
+    /* Binomial */
+    .ws-example { border: 1.5px solid #000; background: #f3f4f6; border-radius: 6px; padding: 7px 11px; margin: 6px 0 10px; break-inside: avoid; }
+    .ws-example h3 { font-size: 11pt; margin-bottom: 3px; }
+    .ws-example ol { margin-left: 18px; font-size: 10.5pt; }
+    .ws-example li { margin: 3px 0; }
+    .ws-math { font-size: 11.5pt; }
+    .ws-ref { border: 1px solid #999; border-radius: 6px; padding: 4px 8px; margin: 4px 0 8px; break-inside: avoid; }
+    .ws-ref .ws-ref-row { display: flex; justify-content: center; position: relative; }
+    .ws-ref .ws-ref-row span.n { width: 0.95cm; text-align: center; font-size: 9pt; }
+    .ws-ref .ws-ref-row .ws-rl { font-size: 7pt; }
+    .ws-prob { margin: 8px 0; break-inside: avoid; page-break-inside: avoid; }
+    .ws-prob .ws-q { font-size: 11.5pt; font-weight: 700; }
+    .ws-prob .ws-work { border-bottom: 1px solid #000; height: 1.15cm; margin-top: 2px; font-size: 11.5pt; display: flex; align-items: flex-end; padding-bottom: 2px; }
+    .ws-prob .ws-work.ans { color: #b91c1c; font-weight: 700; border-bottom-color: #b91c1c; }
+    .ws-prob .ws-small { font-size: 9.5pt; color: #444; }
+
+    @media (max-width: 820px) {
+      .ws-layout { grid-template-columns: 1fr; height: auto; }
+      #wsOverlay { overflow: auto; }
+      .ws-panel { border-right: none; border-bottom: 1px solid var(--border); overflow: visible; }
+      .ws-preview { overflow: visible; padding: 0.6rem; }
+      .ws-sheet { width: 100%; padding: 10px; }
+    }
+
+    @media print {
+      @page { size: A4; margin: 14mm; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body.ws-open { display: block; overflow: visible; min-height: 0; background: #fff; }
+      body.ws-open > *:not(#wsOverlay) { display: none !important; }
+      body.ws-open #wsOverlay { position: static; overflow: visible; background: #fff; display: block; }
+      .ws-layout { display: block; height: auto; }
+      .ws-panel { display: none !important; }
+      .ws-preview { overflow: visible; padding: 0; }
+      .ws-sheet { box-shadow: none; margin: 0; padding: 0; width: auto; max-width: none; }
+      .ws-sheet.ws-pagebreak { break-before: page; page-break-before: always; }
+    }
+
+    .ws-group {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--primary); border-bottom: 2px solid var(--primary-soft); padding-bottom: 2px; margin-top: 0.3rem;
+    }
+    .ws-nowrap { white-space: nowrap; }
+    .ws-h3 { font-size: 11.5pt; margin: 10px 0 3px; break-after: avoid; page-break-after: avoid; }
+    .ws-eq { margin: 4px 0 6px 6px; font-size: 12pt; line-height: 2.5; }
+    .ws-eq .ws-fill { vertical-align: middle; }
   </style>
 </head>
 <body>
@@ -1367,6 +1580,8 @@
         <button class="tab-btn" data-mode="fractals">4. Multiples &amp; Fractals</button>
         <button class="tab-btn" data-mode="theory">5. Theory &amp; Applications</button>
       </nav>
+
+      <button class="ws-launch" onclick="openWorksheets()" title="Create printable worksheets with answer sheets">🖨 Worksheets</button>
     </div>
   </header>
 
@@ -1393,6 +1608,122 @@
       <div class="theory-hub" id="theoryHub" style="display: none;"></div>
     </section>
   </main>
+
+  <!-- ======== WORKSHEET GENERATOR OVERLAY ======== -->
+  <div id="wsOverlay" role="dialog" aria-label="Printable worksheet builder">
+    <div class="ws-layout">
+      <aside class="ws-panel" id="wsPanel">
+        <div>
+          <h2>🖨 Printable Worksheets</h2>
+          <p class="ws-sub">Each ticked topic is its own worksheet and starts on a new page, so you can print one or several together. Use Print, then choose A4 or “Save as PDF”.</p>
+        </div>
+
+        <div class="ws-btn-row">
+          <button class="ws-btn primary" onclick="window.print()">🖨 Print / Save PDF</button>
+          <button class="ws-btn" onclick="wsNewSeed()">🎲 New questions</button>
+          <button class="ws-btn" onclick="closeWorksheets()">✕ Close</button>
+        </div>
+
+        <div class="ws-opt">
+          <div class="ws-opt-body" style="margin-top:0">
+            <label><input type="checkbox" class="ws-ctl" id="wsShowWs" checked> Include worksheets</label>
+            <label><input type="checkbox" class="ws-ctl" id="wsShowAns" checked> Include answer sheets (after the worksheets)</label>
+          </div>
+        </div>
+
+        <div class="ws-group">Younger students</div>
+
+        <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsInsideOn" checked> Fill in the triangle</label>
+          <div class="ws-opt-body">
+            <label>Rows <input type="range" class="ws-ctl" id="wsInsideRows" min="4" max="12" value="8"><output id="wsInsideRowsOut">8</output></label>
+            <label>Extra given numbers
+              <select class="ws-ctl" id="wsInsideHints">
+                <option value="none">None (only the outside 1s)</option>
+                <option value="some">A few inside numbers given</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsRowOn" checked> Row sums</label>
+          <div class="ws-opt-body">
+            <label>Rows <input type="range" class="ws-ctl" id="wsRowRows" min="3" max="10" value="7"><output id="wsRowRowsOut">7</output></label>
+          </div>
+        </div>
+
+        <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsAltOn" checked> Alternating row sums</label>
+          <div class="ws-opt-body">
+            <label>Rows <input type="range" class="ws-ctl" id="wsAltRows" min="3" max="10" value="7"><output id="wsAltRowsOut">7</output></label>
+          </div>
+        </div>
+
+        <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsHockeyOn" checked> Hockey sticks</label>
+          <div class="ws-opt-body">
+            <label>Triangles <input type="range" class="ws-ctl" id="wsHockeyCount" min="2" max="6" value="4"><output id="wsHockeyCountOut">4</output></label>
+            <span>Shaded lines alternate between running up-left and up-right.</span>
+          </div>
+        </div>
+
+        <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsMultOn" checked> Colour the multiples</label>
+          <div class="ws-opt-body">
+            <label>Rows <input type="range" class="ws-ctl" id="wsMultRows" min="8" max="16" value="12"><output id="wsMultRowsOut">12</output></label>
+            <div>Times tables (one triangle each):</div>
+            <div class="ws-divs">
+              <label><input type="checkbox" class="ws-ctl wsDiv" value="2" checked>2</label>
+              <label><input type="checkbox" class="ws-ctl wsDiv" value="3" checked>3</label>
+              <label><input type="checkbox" class="ws-ctl wsDiv" value="4">4</label>
+              <label><input type="checkbox" class="ws-ctl wsDiv" value="5">5</label>
+              <label><input type="checkbox" class="ws-ctl wsDiv" value="6">6</label>
+              <label><input type="checkbox" class="ws-ctl wsDiv" value="7">7</label>
+              <label><input type="checkbox" class="ws-ctl wsDiv" value="8">8</label>
+              <label><input type="checkbox" class="ws-ctl wsDiv" value="9">9</label>
+              <label><input type="checkbox" class="ws-ctl wsDiv" value="10">10</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="ws-group">Advanced students</div>
+
+        <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsBinomOn"> Binomial expansion</label>
+          <div class="ws-opt-body">
+            <label>Level
+              <select class="ws-ctl" id="wsBinomLevel">
+                <option value="1">1 &ndash; (x + y)ⁿ</option>
+                <option value="2">2 &ndash; (x ± number)ⁿ</option>
+                <option value="3">3 &ndash; (ax ± b)ⁿ</option>
+              </select>
+            </label>
+            <label>Questions <input type="range" class="ws-ctl" id="wsBinomCount" min="2" max="6" value="4"><output id="wsBinomCountOut">4</output></label>
+            <label><input type="checkbox" class="ws-ctl" id="wsBinomRef" checked> Show a reference copy of rows 0&ndash;8</label>
+            <span>Includes a worked example.</span>
+          </div>
+        </div>
+
+        <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsCoeffOn"> Binomial coefficients &amp; factorials</label>
+          <div class="ws-opt-body">
+            <label>Calculations <input type="range" class="ws-ctl" id="wsCoeffCount" min="3" max="6" value="4"><output id="wsCoeffCountOut">4</output></label>
+            <span>Definition, worked example, symmetry and the edge values.</span>
+          </div>
+        </div>
+
+        <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsProofOn"> Algebraic proof of the triangle rule</label>
+          <div class="ws-opt-body">
+            <span>A numerical check, then a guided fill-in-the-blanks proof that each entry is the sum of the two above it.</span>
+          </div>
+        </div>
+      </aside>
+
+      <section class="ws-preview" id="wsPreview"></section>
+    </div>
+  </div>
 
   <div class="canvas-tooltip" id="canvasTooltip"></div>
 
@@ -4096,6 +4427,463 @@
         drawSvgConnectors();
       }
     });
+
+    // ==========================================
+    // 11. PRINTABLE WORKSHEET GENERATOR
+    // ==========================================
+    const ws = { seed: 20261120, cfg: null };
+    const wsG = (id) => document.getElementById(id);
+    const WS_MINUS = "\u2212";
+
+    function wsRng(seed) {
+      let a = seed >>> 0;
+      return () => {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    function wsShuffle(arr, rnd) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    const wsNum = (v) => (v < 0 ? WS_MINUS + -v : String(v));
+    const wsSup = (e) => `<sup>${e}</sup>`;
+    const wsFact = (n) => factorialBig(n).toString();
+    const wsBin = (n, k) => pascalBig[n][k].toString();
+
+    function openWorksheets() {
+      document.body.classList.add("ws-open");
+      wsRefresh();
+    }
+    function closeWorksheets() {
+      document.body.classList.remove("ws-open");
+    }
+    function wsNewSeed() {
+      ws.seed = Math.floor(Math.random() * 1e9);
+      wsRefresh();
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && document.body.classList.contains("ws-open")) closeWorksheets();
+    });
+
+    function wsReadCfg() {
+      const num = (id) => Number(wsG(id).value);
+      const on = (id) => wsG(id).checked;
+      ["wsInsideRows", "wsRowRows", "wsAltRows", "wsHockeyCount", "wsMultRows", "wsBinomCount", "wsCoeffCount"].forEach((id) => {
+        const o = wsG(id + "Out");
+        if (o) o.textContent = wsG(id).value;
+      });
+      return {
+        showWs: on("wsShowWs"),
+        showAns: on("wsShowAns"),
+        inside: { on: on("wsInsideOn"), rows: num("wsInsideRows"), hints: wsG("wsInsideHints").value },
+        rowsum: { on: on("wsRowOn"), rows: num("wsRowRows") },
+        altsum: { on: on("wsAltOn"), rows: num("wsAltRows") },
+        hockey: { on: on("wsHockeyOn"), count: num("wsHockeyCount") },
+        mult: {
+          on: on("wsMultOn"),
+          rows: num("wsMultRows"),
+          divs: [...document.querySelectorAll(".wsDiv:checked")].map((x) => Number(x.value))
+        },
+        binom: { on: on("wsBinomOn"), level: num("wsBinomLevel"), count: num("wsBinomCount"), ref: on("wsBinomRef") },
+        coeff: { on: on("wsCoeffOn"), count: num("wsCoeffCount") },
+        proof: { on: on("wsProofOn") }
+      };
+    }
+
+    wsG("wsPanel").addEventListener("input", wsRefresh);
+    wsG("wsPanel").addEventListener("change", wsRefresh);
+
+    // ---------- Question generation (one model, rendered twice) ----------
+    const WS_EXAMPLES = {
+      1: { n: 4, a: 1, b: 1, yVar: true },
+      2: { n: 3, a: 1, b: -3, yVar: false },
+      3: { n: 4, a: 2, b: 1, yVar: false }
+    };
+
+    function wsGenerate(cfg, seed) {
+      const rnd = wsRng(seed);
+      const m = {};
+
+      if (cfg.inside.on) {
+        const R = cfg.inside.rows;
+        const given = new Set();
+        for (let r = 0; r < R; r++) { given.add(`${r},0`); given.add(`${r},${r}`); }
+        if (cfg.inside.hints === "some") {
+          for (let r = 3; r < R; r++) for (let k = 1; k < r; k++) if (rnd() < 0.2) given.add(`${r},${k}`);
+        }
+        m.inside = { R, given };
+      }
+      if (cfg.rowsum.on) m.rowsum = { R: cfg.rowsum.rows };
+      if (cfg.altsum.on) m.altsum = { R: cfg.altsum.rows };
+
+      if (cfg.hockey.on) {
+        const opts = [];
+        for (let j = 1; j <= 4; j++) for (let L = 3; L <= 6; L++) if (j + L - 1 <= 7) opts.push({ j, L, e: j + L - 1 });
+        const picks = wsShuffle(opts, rnd).slice(0, cfg.hockey.count);
+        const firstLeft = rnd() < 0.5;
+        // Directions alternate, so there are always sticks going both ways
+        m.hockey = picks.map((o, i) => {
+          const orient = (i % 2 === 0) === firstLeft ? "left" : "right";
+          const cells = [];
+          let sum = 0n;
+          for (let r = o.j; r <= o.e; r++) {
+            const k = orient === "left" ? o.j : r - o.j;
+            cells.push({ r, k });
+            sum += pascalBig[r][k];
+          }
+          const blade = { r: o.e + 1, k: orient === "left" ? o.j + 1 : o.e - o.j };
+          return { ...o, orient, cells, blade, sum };
+        });
+      }
+
+      if (cfg.mult.on && cfg.mult.divs.length) m.mult = { R: cfg.mult.rows, divs: cfg.mult.divs };
+
+      if (cfg.binom.on) {
+        const lv = cfg.binom.level, cnt = cfg.binom.count, probs = [];
+        if (lv === 1) {
+          wsShuffle([2, 3, 5, 6, 7, 8], rnd).slice(0, cnt).sort((a, b) => a - b)
+            .forEach((n) => probs.push({ n, a: 1, b: 1, yVar: true }));
+        } else if (lv === 2) {
+          const used = new Set(["3,-3"]);
+          for (let i = 0; i < cnt; i++) {
+            let n, c, key;
+            do {
+              n = 2 + Math.floor(rnd() * 4);
+              c = 1 + Math.floor(rnd() * 4);
+              if (i % 2 === 1) c = -c;
+              key = n + "," + c;
+            } while (used.has(key));
+            used.add(key);
+            probs.push({ n, a: 1, b: c, yVar: false });
+          }
+        } else {
+          const used = new Set(["2,1,4"]);
+          for (let i = 0; i < cnt; i++) {
+            let n, a, b, key;
+            do {
+              n = 2 + Math.floor(rnd() * 3);
+              a = 2 + Math.floor(rnd() * 2);
+              b = 1 + Math.floor(rnd() * 3);
+              if (i % 2 === 1) b = -b;
+              key = `${a},${b},${n}`;
+            } while (used.has(key));
+            used.add(key);
+            probs.push({ n, a, b, yVar: false });
+          }
+        }
+        probs.sort((p, q) => p.n - q.n);
+        m.binom = { level: lv, probs, ref: cfg.binom.ref };
+      }
+
+      if (cfg.coeff.on) {
+        const used = new Set(), list = [];
+        let guard = 0;
+        while (list.length < cfg.coeff.count && guard++ < 300) {
+          const n = 5 + Math.floor(rnd() * 6);            // 5..10
+          const k = 2 + Math.floor(rnd() * (n - 3));      // 2..n-2
+          if (used.has(`${n},${k}`) || used.has(`${n},${n - k}`)) continue;
+          used.add(`${n},${k}`);
+          list.push({ n, k });
+        }
+        list.sort((a, b) => a.n - b.n || a.k - b.k);
+        const sn = 6 + Math.floor(rnd() * 4);              // 6..9
+        let sk = 2 + Math.floor(rnd() * 2);                // 2 or 3
+        if (sn === 2 * sk) sk = 2;
+        m.coeff = { list, sym: { n: sn, k: sk }, zeroN: 4 + Math.floor(rnd() * 5) };
+      }
+
+      if (cfg.proof.on) {
+        const n = 6 + Math.floor(rnd() * 3);               // 6..8
+        const k = 2 + Math.floor(rnd() * (n - 3));         // 2..n-2
+        m.proof = { n, k };
+      }
+      return m;
+    }
+
+    // ---------- Shared HTML builders ----------
+    function wsTriangleHTML(R, cellFn, o) {
+      const cw = o.cw, ch = o.ch, fs = o.fs;
+      let html = `<div class="ws-tri ${o.mini ? "mini" : ""}" style="--cw:${cw}cm;--ch:${ch}cm;--fs:${fs}pt">`;
+      for (let r = 0; r < R; r++) {
+        html += `<div class="ws-tri-row">`;
+        if (o.labels) html += `<span class="ws-rl">Row ${r}</span>`;
+        for (let k = 0; k <= r; k++) {
+          const c = cellFn(r, k);
+          html += `<div class="ws-cell ${c.cls || ""}">${c.text}</div>`;
+        }
+        html += `</div>`;
+      }
+      return html + `</div>`;
+    }
+
+    function wsPolyTitle(p) {
+      const A = p.a === 1 ? "x" : p.a + "x";
+      const B = p.yVar ? "y" : String(Math.abs(p.b));
+      return `(${A} ${p.b < 0 ? WS_MINUS : "+"} ${B})${wsSup(p.n)}`;
+    }
+    function wsPolyExpanded(p) {
+      const A = p.a === 1 ? "x" : `${p.a}x`;
+      const B = p.yVar ? "y" : wsNum(p.b);
+      const wrap = (s, plain) => (plain ? s : `(${s})`);
+      const parts = [];
+      for (let k = 0; k <= p.n; k++) {
+        parts.push(`${pascalBig[p.n][k]} &times; ${wrap(A, p.a === 1)}${wsSup(p.n - k)} &times; ${wrap(B, p.yVar || p.b > 0)}${wsSup(k)}`);
+      }
+      return parts.join(" + ");
+    }
+    function wsPolySimplified(p) {
+      let out = "";
+      for (let k = 0; k <= p.n; k++) {
+        const coef = Number(pascalBig[p.n][k]) * Math.pow(p.a, p.n - k) * Math.pow(p.b, k);
+        const abs = Math.abs(coef), px = p.n - k, py = p.yVar ? k : 0;
+        let t = "";
+        if (abs !== 1 || (px === 0 && py === 0)) t += abs;
+        if (px > 0) t += "x" + (px > 1 ? wsSup(px) : "");
+        if (py > 0) t += "y" + (py > 1 ? wsSup(py) : "");
+        out += k === 0 ? (coef < 0 ? WS_MINUS : "") + t : ` ${coef < 0 ? WS_MINUS : "+"} ${t}`;
+      }
+      return out;
+    }
+    function wsRowText(n, sep) {
+      return pascalBig[n].map(String).join(sep || " &nbsp; ");
+    }
+    function wsRefHTML(maxRow) {
+      let h = `<div class="ws-ref">`;
+      for (let r = 0; r <= maxRow; r++) {
+        h += `<div class="ws-ref-row"><span class="ws-rl">Row ${r}</span>` +
+          pascalBig[r].map((v) => `<span class="n">${v}</span>`).join("") + `</div>`;
+      }
+      return h + `</div>`;
+    }
+    // Question followed by writing lines (worksheet) or a red answer (answer sheet)
+    function wsLines(question, answerHTML, withAns, nLines) {
+      let h = `<div class="ws-lines ws-block"><div class="ws-lineq">${question}</div>`;
+      if (withAns) h += `<div class="ws-red">${answerHTML}</div>`;
+      else for (let i = 0; i < (nLines || 2); i++) h += `<div class="ws-wline"></div>`;
+      return h + `</div>`;
+    }
+    const wsNotice = (text, ans) => wsLines("<strong>What do you notice?</strong>", text, ans, 4);
+    function wsBl(text, ans, w) {
+      return ans
+        ? `<span class="ws-fill ans">${text}</span>`
+        : `<span class="ws-fill" style="min-width:${w || 1.5}cm">&nbsp;</span>`;
+    }
+
+    // ---------- Younger-student worksheets (no algebra, no notation) ----------
+    function wsActInside(d, ans) {
+      const R = d.R;
+      const cw = Math.min(1.3, 14.6 / R).toFixed(2);
+      const rule = `<div class="ws-rule">
+        <div class="ws-rule-diag"><div class="top"><span>3</span><span>4</span></div><span class="res">7</span></div>
+        <div><strong>The rule:</strong> every number inside the triangle is found by <strong>adding the two numbers directly above it</strong>.<br/>
+        In the picture, 3 + 4 = 7.</div>
+      </div>`;
+      const tri = wsTriangleHTML(R, (r, k) => {
+        const isGiven = d.given.has(`${r},${k}`);
+        const v = pascalBig[r][k].toString();
+        if (isGiven) return { cls: "given", text: v };
+        return ans ? { cls: "ans", text: v } : { cls: "", text: "" };
+      }, { cw, ch: (cw * 0.78).toFixed(2), fs: R > 10 ? 9 : 10.5, labels: true });
+      return `<p class="ws-instr">The shaded numbers are given. Use the rule to fill in every empty box, working down from the top.</p>${rule}${tri}`;
+    }
+
+    function wsActRowSum(d, ans) {
+      let rows = "", sums = [];
+      for (let r = 0; r <= d.R; r++) {
+        const ex = r === 0;
+        const sum = pascalBig[r].reduce((a, b) => a + b, 0n);
+        sums.push(sum);
+        rows += `<tr class="${ex ? "ws-example" : ""}"><td>${r}</td><td>${wsRowText(r)}</td>` +
+          (ex || ans ? `<td class="${ans && !ex ? "ws-ans" : "ws-ex-ans"}">${sum}</td>` : `<td class="ws-blank"></td>`) + `</tr>`;
+      }
+      return `<p class="ws-instr">Add up the numbers in each row of the triangle and write the answer in the last column. The top row is Row 0, and it has been done for you.</p>
+        <table class="ws-table"><tr><th>Row</th><th>Numbers in the row</th><th>Sum</th></tr>${rows}</table>
+        ${wsNotice(`Each row adds up to <strong>double</strong> the row before it: ${sums.join(", ")}&hellip;`, ans)}`;
+    }
+
+    function wsActAltSum(d, ans) {
+      let rows = "";
+      for (let r = 0; r <= d.R; r++) {
+        const ex = r === 0;
+        const expr = pascalBig[r].map((v, k) => (k === 0 ? String(v) : (k % 2 ? ` ${WS_MINUS} ` : " + ") + v)).join("");
+        const val = r === 0 ? 1 : 0;
+        rows += `<tr class="${ex ? "ws-example" : ""}"><td>${r}</td><td class="left">${expr}</td>` +
+          (ex || ans ? `<td class="${ans && !ex ? "ws-ans" : "ws-ex-ans"}">${val}</td>` : `<td class="ws-blank"></td>`) + `</tr>`;
+      }
+      return `<p class="ws-instr">In each row, <strong>subtract</strong> and <strong>add</strong> the numbers one after the other, going from left to right. The first number is always added. Write each answer in the last column. Row 0 has been done for you.</p>
+        <table class="ws-table"><tr><th>Row</th><th>Subtract and add</th><th>Answer</th></tr>${rows}</table>
+        ${wsNotice("Every row after Row 0 gives the answer <strong>0</strong>. The numbers that are added and the numbers that are taken away balance each other out.", ans)}`;
+    }
+
+    function wsActHockey(list, ans) {
+      const boxes = list.map((h, i) => {
+        const R = h.e + 2;
+        const tri = wsTriangleHTML(R, (r, k) => {
+          let cls = "";
+          if (h.cells.some((c) => c.r === r && c.k === k)) cls = "stick";
+          else if (ans && h.blade.r === r && h.blade.k === k) cls = "blade";
+          return { cls, text: pascalBig[r][k].toString() };
+        }, { cw: 0.62, ch: 0.5, fs: 6.5, mini: true });
+        const nums = h.cells.map((c) => pascalBig[c.r][c.k]).join(" + ");
+        return `<div class="ws-hbox"><h3>Triangle ${i + 1}</h3>${tri}
+          <div class="ws-hline">1. Add the shaded numbers:<br/>${ans ? `<span class="ws-fill ans">${nums} = ${h.sum}</span>` : `<span class="ws-fill" style="min-width:5cm">&nbsp;</span>`}</div>
+          <div class="ws-hline">2. Find your answer somewhere else in the triangle and circle it.${ans ? ` <span class="ws-red">(The highlighted box.)</span>` : ""}</div></div>`;
+      }).join("");
+      return `<p class="ws-instr">In each triangle, a line of numbers has been shaded. Each line starts at a 1 on the edge of the triangle. Follow the two steps under each triangle.</p>
+        <div class="ws-hgrid">${boxes}</div>
+        ${wsNotice("The answer is always found in the triangle just beyond the end of the shaded line, one row further down.", ans)}`;
+    }
+
+    function wsActMult(d, ans) {
+      const R = d.R;
+      const cw = Math.min(1.2, 16 / R).toFixed(2);
+      const fs = R <= 10 ? 9 : R <= 13 ? 8 : 6.5;
+      const tris = d.divs.map((div) => {
+        const tri = wsTriangleHTML(R, (r, k) => ({
+          cls: ans && pascalBig[r][k] % BigInt(div) === 0n ? "mult" : "",
+          text: pascalBig[r][k].toString()
+        }), { cw, ch: (cw * 0.74).toFixed(2), fs, labels: false });
+        return `<div class="ws-block"><h3 style="font-size:11pt;margin-top:6px">Colour every number in the ${div} times table</h3>${tri}</div>`;
+      }).join("");
+      return `<p class="ws-instr">In each triangle, colour every number that is in the times table shown. (These numbers are called <em>multiples</em>.)</p>${tris}
+        ${wsNotice("The coloured numbers make a pattern of triangle shapes, and the pattern is the same on the left and the right. Answers will vary.", ans)}`;
+    }
+
+    // ---------- Advanced worksheets ----------
+    function wsActBinom(d, ans) {
+      const ex = WS_EXAMPLES[d.level];
+      const example = `<div class="ws-example"><h3>Worked example: expand ${wsPolyTitle(ex)}</h3><ol>
+        <li>Row ${ex.n} of Pascal's triangle gives the coefficients: <strong>${wsRowText(ex.n, ", ")}</strong>.</li>
+        <li>The power of the first term goes <em>down</em> from ${ex.n} to 0 while the power of the second term goes <em>up</em> from 0 to ${ex.n}:<br/><span class="ws-math">${wsPolyExpanded(ex)}</span></li>
+        <li>Simplify:<br/><span class="ws-math"><strong>${wsPolyTitle(ex)} = ${wsPolySimplified(ex)}</strong></span></li></ol></div>`;
+      const probs = d.probs.map((p, i) => {
+        const q = `<div class="ws-q">${i + 1}. Expand ${wsPolyTitle(p)}</div>`;
+        if (ans) {
+          const working = d.level === 1 ? "" : `<div class="ws-small">${wsPolyExpanded(p)}</div>`;
+          return `<div class="ws-prob">${q}${working}<div class="ws-work ans"><span>= ${wsPolySimplified(p)}</span></div></div>`;
+        }
+        return `<div class="ws-prob">${q}<div class="ws-work"><span>=</span></div></div>`;
+      }).join("");
+      const intro = d.level === 1 ? "Use the rows of Pascal's triangle to expand each expression."
+        : d.level === 2 ? "Use Pascal's triangle to expand each expression. Take care with signs when the number is negative."
+        : "Use Pascal's triangle to expand each expression. Remember to raise the <em>whole</em> term (including its number) to each power.";
+      return `<p class="ws-instr">${intro}</p>${d.ref ? wsRefHTML(8) : ""}${example}${probs}`;
+    }
+
+    function wsActCoeff(d, ans) {
+      const defn = `<div class="ws-example"><h3>Key ideas</h3><ol>
+        <li><strong>Factorial.</strong> <em>n</em>! means <em>n</em> &times; (<em>n</em> &minus; 1) &times; (<em>n</em> &minus; 2) &times; &hellip; &times; 2 &times; 1. For example, 5! = 5 &times; 4 &times; 3 &times; 2 &times; 1 = 120. We also define 0! = 1.</li>
+        <li><strong>Binomial coefficient</strong> (read &ldquo;<em>n</em> choose <em>k</em>&rdquo;): ${binomHTML("n", "k")} = ${fracHTML("n!", "k!(n &minus; k)!")}<br/>
+        It is the number in row <em>n</em>, position <em>k</em> of Pascal's triangle (counting both from 0).</li></ol>
+        <div class="ws-math" style="margin-top:4px"><strong>Example:</strong> ${binomHTML(6, 2)} = ${fracHTML("6!", "2! &times; 4!")} = ${fracHTML("720", "2 &times; 24")} = ${fracHTML("720", "48")} = <strong>15</strong>, the number in row 6, position 2.</div></div>`;
+
+      const facts = [0, 1, 3, 5, 7].map((n) => `<span class="ws-nowrap">${n}! = ${wsBl(wsFact(n), ans, 2)}</span>`).join(" &nbsp;&nbsp; ");
+      const partA = `<div class="ws-block"><h3 class="ws-h3">Part A &ndash; Factorials</h3><div class="ws-eq">${facts}</div></div>`;
+
+      const partB = `<h3 class="ws-h3">Part B &ndash; Use the formula</h3>
+        <p class="ws-instr">Work out each binomial coefficient. Then check your answer against Pascal's triangle.</p>` +
+        d.list.map((p, i) => {
+          const setup = `${i + 1}. ${binomHTML(p.n, p.k)} = ${fracHTML(`${p.n}!`, `${p.k}! &times; ${p.n - p.k}!`)}`;
+          if (ans) {
+            return `<div class="ws-prob"><div class="ws-eq">${setup} = ${fracHTML(wsFact(p.n), `${wsFact(p.k)} &times; ${wsFact(p.n - p.k)}`)} = ${wsBl(wsBin(p.n, p.k), true)}</div></div>`;
+          }
+          return `<div class="ws-prob"><div class="ws-eq">${setup} = ${wsBl("", false, 3)}</div><div class="ws-wline"></div></div>`;
+        }).join("") + wsRefHTML(10);
+
+      const s = d.sym;
+      const partC = `<div class="ws-block"><h3 class="ws-h3">Part C &ndash; A symmetry</h3>
+        <div class="ws-eq">${binomHTML(s.n, s.k)} = ${wsBl(wsBin(s.n, s.k), ans, 2.2)} &nbsp;&nbsp;&nbsp; ${binomHTML(s.n, s.n - s.k)} = ${wsBl(wsBin(s.n, s.n - s.k), ans, 2.2)}</div>
+        ${wsLines("What do you notice? Use the formula to explain why this happens.",
+          "The two answers are equal. In the formula, <em>k</em>! and (<em>n</em> &minus; <em>k</em>)! just swap places in the denominator, and multiplication can be done in any order.", ans, 3)}</div>`;
+
+      const z = d.zeroN;
+      const partD = `<div class="ws-block"><h3 class="ws-h3">Part D &ndash; The edges of the triangle</h3>
+        <div class="ws-eq">${binomHTML(z, 0)} = ${wsBl("1", ans, 2.2)} &nbsp;&nbsp;&nbsp; ${binomHTML(z, z)} = ${wsBl("1", ans, 2.2)}</div>
+        ${wsLines("Explain why these are both 1 for every value of <em>n</em>. (Hint: 0! = 1.)",
+          `${binomHTML("n", 0)} = ${fracHTML("n!", "0! &times; n!")} = ${fracHTML("n!", "n!")} = 1, and ${binomHTML("n", "n")} = ${fracHTML("n!", "n! &times; 0!")} = 1.`, ans, 3)}</div>`;
+
+      return `<p class="ws-instr">This worksheet introduces the formula for the numbers in Pascal's triangle.</p>${defn}${partA}${partB}${partC}${partD}`;
+    }
+
+    function wsActProof(d, ans) {
+      const bl = (t, w) => wsBl(t, ans, w);
+      const n = d.n, k = d.k;
+      const intro = `<div class="ws-example"><h3>What we will prove</h3>
+        <div class="ws-math">${binomHTML("n &minus; 1", "k &minus; 1")} + ${binomHTML("n &minus; 1", "k")} = ${binomHTML("n", "k")}</div>
+        <div style="margin-top:3px">This is the rule that each number in Pascal's triangle is the sum of the two numbers above it. We use ${binomHTML("n", "k")} = ${fracHTML("n!", "k!(n &minus; k)!")} and the fact that <em>n</em>! = <em>n</em> &times; (<em>n</em> &minus; 1)!.</div></div>`;
+
+      const warm = `<h3 class="ws-h3">Part A &ndash; Check one case with numbers</h3>
+        <p class="ws-instr">Take <em>n</em> = ${n} and <em>k</em> = ${k}. Use the formula to work out:</p>
+        <div class="ws-eq">${binomHTML(n - 1, k - 1)} = ${bl(wsBin(n - 1, k - 1), 2)} &nbsp;&nbsp; ${binomHTML(n - 1, k)} = ${bl(wsBin(n - 1, k), 2)} &nbsp;&nbsp; sum = ${bl(String(pascalBig[n - 1][k - 1] + pascalBig[n - 1][k]), 2)}</div>
+        <div class="ws-eq">${binomHTML(n, k)} = ${bl(wsBin(n, k), 2)}</div>
+        ${wsLines("Do both sides agree?", "Yes &ndash; " + `${wsBin(n - 1, k - 1)} + ${wsBin(n - 1, k)} = ${wsBin(n, k)}.`, ans, 1)}`;
+
+      const den = "k!(n &minus; k)!";
+      const proof = `<h3 class="ws-h3">Part B &ndash; The algebraic proof</h3>
+        <p class="ws-instr">Fill in the blanks. Assume 1 &le; <em>k</em> &le; <em>n</em> &minus; 1.</p>
+
+        <div class="ws-block"><div class="ws-q">Step 1. Write each term using the formula.</div>
+        <div class="ws-eq">${binomHTML("n &minus; 1", "k &minus; 1")} = ${fracHTML("(n &minus; 1)!", `(k &minus; 1)! (${bl("n &minus; k", 1.6)})!`)}
+        &nbsp;&nbsp; and &nbsp;&nbsp; ${binomHTML("n &minus; 1", "k")} = ${fracHTML("(n &minus; 1)!", `k! (${bl("n &minus; k &minus; 1", 2)})!`)}</div></div>
+
+        <div class="ws-block"><div class="ws-q">Step 2. Get a common denominator.</div>
+        <div class="ws-instr">Use <em>k</em>! = <em>k</em> &times; (<em>k</em> &minus; 1)! and (<em>n</em> &minus; <em>k</em>)! = (<em>n</em> &minus; <em>k</em>) &times; (<em>n</em> &minus; <em>k</em> &minus; 1)!. Multiply the top and bottom of the first fraction by ${bl("k", 1)}, and the second by ${bl("n &minus; k", 1.6)}.</div>
+        <div class="ws-eq">Left side = ${fracHTML(`${bl("k", 1)} &times; (n &minus; 1)!`, den)} + ${fracHTML(`${bl("n &minus; k", 1.6)} &times; (n &minus; 1)!`, den)}</div></div>
+
+        <div class="ws-block"><div class="ws-q">Step 3. Add the fractions and take out the common factor (<em>n</em> &minus; 1)!.</div>
+        <div class="ws-eq">= ${fracHTML(`(n &minus; 1)! &times; [ <em>k</em> + (<em>n</em> &minus; <em>k</em>) ]`, den)} = ${fracHTML(`(n &minus; 1)! &times; ${bl("n", 1)}`, den)}</div></div>
+
+        <div class="ws-block"><div class="ws-q">Step 4. Use <em>n</em> &times; (<em>n</em> &minus; 1)! = <em>n</em>!</div>
+        <div class="ws-eq">= ${fracHTML(bl("n!", 1.4), den)} = ${binomHTML("n", "k")}</div></div>
+
+        <div class="ws-block"><div class="ws-q">Conclusion.</div>
+        ${wsLines("In your own words, what have we shown?",
+          `${binomHTML("n &minus; 1", "k &minus; 1")} + ${binomHTML("n &minus; 1", "k")} = ${binomHTML("n", "k")}: every number in Pascal's triangle (that is not on the edge) equals the sum of the two numbers directly above it.`, ans, 3)}</div>`;
+
+      return `${intro}${warm}${proof}`;
+    }
+
+    // ---------- Assembly: one worksheet per topic, page break between each ----------
+    const WS_TOPICS = [
+      { key: "inside", title: "Pascal's Triangle: Fill in the Triangle", fn: wsActInside },
+      { key: "rowsum", title: "Pascal's Triangle: Row Sums", fn: wsActRowSum },
+      { key: "altsum", title: "Pascal's Triangle: Subtract and Add Along the Rows", fn: wsActAltSum },
+      { key: "hockey", title: "Pascal's Triangle: Hockey Sticks", fn: wsActHockey },
+      { key: "mult", title: "Pascal's Triangle: Colouring Multiples", fn: wsActMult },
+      { key: "binom", title: "Binomial Expansion", fn: wsActBinom },
+      { key: "coeff", title: "Binomial Coefficients and Factorials", fn: wsActCoeff },
+      { key: "proof", title: "Proving the Pascal's Triangle Rule", fn: wsActProof }
+    ];
+
+    function wsSheetHTML(title, body, ans, pageBreak) {
+      const head = ans
+        ? `<div class="ws-head"><h1>${title} &ndash; Answers</h1><span class="ws-key-tag">ANSWERS</span></div>`
+        : `<div class="ws-head"><h1>${title}</h1><div class="ws-name">Name:<span></span>Date:<span class="short"></span></div></div>`;
+      return `<div class="ws-sheet ${pageBreak ? "ws-pagebreak" : ""}">${head}${body}</div>`;
+    }
+
+    function wsRefresh() {
+      ws.cfg = wsReadCfg();
+      const model = wsGenerate(ws.cfg, ws.seed);
+      const topics = WS_TOPICS.filter((t) => model[t.key]);
+      const sheets = [];
+      if (ws.cfg.showWs) topics.forEach((t) => sheets.push({ t, ans: false }));
+      if (ws.cfg.showAns) topics.forEach((t) => sheets.push({ t, ans: true }));
+      let html;
+      if (!sheets.length) {
+        html = `<div class="ws-empty">Tick at least one worksheet${topics.length ? " and choose worksheet and/or answers" : ""} to see a preview.</div>`;
+      } else {
+        html = sheets.map((s, i) => wsSheetHTML(s.t.title, s.t.fn(model[s.t.key], s.ans), s.ans, i > 0)).join("");
+      }
+      wsG("wsPreview").innerHTML = html;
+    }
 
     // Initial boot
     renderAll();
