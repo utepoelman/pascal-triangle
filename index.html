@@ -1559,6 +1559,25 @@
     .ws-h3 { font-size: 11.5pt; margin: 10px 0 3px; break-after: avoid; page-break-after: avoid; }
     .ws-eq { margin: 4px 0 6px 6px; font-size: 12pt; line-height: 2.5; }
     .ws-eq .ws-fill { vertical-align: middle; }
+
+    /* Approximating pi (Theory tab) */
+    .pi-tri { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 9px; max-width: 100%; overflow-x: auto; }
+    .pi-row { display: flex; gap: 2px; justify-content: center; }
+    .pi-cell { min-width: 28px; height: 21px; padding: 0 2px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 600; border-radius: 4px; background: var(--surface-alt); border: 1px solid var(--border); color: var(--text-muted); }
+    .pi-cell.used { background: #fcd34d; border-color: #b45309; color: #78350f; font-weight: 800; }
+    .pi-cell.skip { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); font-weight: 700; }
+    .pi-legend { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem; display: flex; align-items: center; gap: 0.3rem; }
+    .pi-key { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 1px solid; }
+    .pi-key.used { background: #fcd34d; border-color: #b45309; }
+    .pi-key.skip { background: var(--primary-soft); border-color: var(--primary); }
+    .pi-two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: center; }
+    .pi-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .pi-table th, .pi-table td { padding: 0.28rem 0.45rem; border-bottom: 1px solid var(--border); text-align: right; font-variant-numeric: tabular-nums; }
+    .pi-table th { color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; }
+    .pi-table tr.last td { background: var(--primary-soft); font-weight: 700; }
+    @media (max-width: 820px) { .pi-two { grid-template-columns: 1fr; } }
+
+    .ws-cell.sh2 { background: #bfdbfe; border: 1.5px dashed #000 !important; font-weight: 800; }
   </style>
 </head>
 <body>
@@ -1719,6 +1738,21 @@
             <span>A numerical check, then a guided fill-in-the-blanks proof that each entry is the sum of the two above it.</span>
           </div>
         </div>
+              <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsIndOn"> Proof by induction</label>
+          <div class="ws-opt-body">
+            <label><input type="checkbox" class="ws-ctl" id="wsIndHockey" checked> The hockey-stick identity</label>
+            <label><input type="checkbox" class="ws-ctl" id="wsIndFib" checked> Fibonacci numbers (shallow diagonals)</label>
+          </div>
+        </div>
+
+        <div class="ws-opt">
+          <label class="ws-opt-head"><input type="checkbox" class="ws-ctl" id="wsPiOn"> Approximating &pi;</label>
+          <div class="ws-opt-body">
+            <label>Terms <input type="range" class="ws-ctl" id="wsPiTerms" min="4" max="8" value="6"><output id="wsPiTermsOut">6</output></label>
+            <span>Uses 3 + &#8532; &times; (1/4 &minus; 1/20 + 1/56 &minus; &hellip;) from a diagonal. Needs a calculator.</span>
+          </div>
+        </div>
       </aside>
 
       <section class="ws-preview" id="wsPreview"></section>
@@ -1835,7 +1869,8 @@
       fractalFeedback: null,
 
       // Mode 5: Theory, Proofs & Applications
-      theoryTopic: "proof",     // 'proof' | 'induction' | 'combinatorics' | 'applications' | 'history'
+      theoryTopic: "proof",     // 'proof' | 'induction' | 'combinatorics' | 'applications' | 'pi' | 'history'
+      piTerms: 4,
       proofN: 5,
       proofR: 2,
       indProofType: "rowsum",   // 'rowsum' | 'hockey'
@@ -2023,8 +2058,11 @@
             <button class="pill-btn ${state.theoryTopic === "applications" ? "active" : ""}" onclick="setTheoryTopic('applications')">
               <span>4. Applications</span>
             </button>
+            <button class="pill-btn ${state.theoryTopic === "pi" ? "active" : ""}" onclick="setTheoryTopic('pi')">
+              <span>5. Approximating &pi;</span>
+            </button>
             <button class="pill-btn ${state.theoryTopic === "history" ? "active" : ""}" onclick="setTheoryTopic('history')">
-              <span>5. Global History</span>
+              <span>6. Global History</span>
             </button>
           </div>
         `;
@@ -2296,7 +2334,7 @@
               <strong>Fractal Zoom Unlocked (mod ${state.divisor}):</strong> ${customNote}
             </div>
             <div class="equation-box">
-              <span>Zoom: <span class="chip-cyan">${state.fractalRows} rows</span> (${((state.fractalRows * (state.fractalRows + 1)) / 2).toLocaleString()} numbers)</span>
+              <span>Zoom: <span class="chip-cyan">${state.fractalRows} rows</span> (${((state.fractalRows * (state.fractalRows + 1)) / 2).toLocaleString("en-NZ")} numbers)</span>
             </div>
           `;
         }
@@ -2306,6 +2344,7 @@
           induction: "Using mathematical induction and Pascal's addition rule to prove universal properties for every row n.",
           combinatorics: "Why Pascal's triangle counts combinations—choosing r items from a set of n distinct objects.",
           applications: "How Pascal's triangle powers polynomial expansion, probability distributions, shortest grid paths, and fractals.",
+          pi: "A surprising way to approximate \u03C0 using the reciprocals of entries on one diagonal of the triangle.",
           history: "Over 2,000 years of independent discovery across India, Persia, China, and Europe."
         };
         insightEl.innerHTML = `
@@ -3763,6 +3802,52 @@
             </div>
           </div>
         `;
+      } else if (state.theoryTopic === "pi") {
+        const t12 = piData(12)[11].approx.toFixed(5);
+        theoryHub.innerHTML = `
+          <div class="proof-box">
+            <div class="companion-header">
+              <span class="companion-title"><span>Approximating &pi; with a Diagonal of Pascal's Triangle</span></span>
+              <div class="control-group">
+                <span class="control-label">Terms:</span>
+                <input type="range" min="1" max="12" value="${state.piTerms}" style="width:110px" oninput="setPiTerms(this.value)" />
+                <span class="number-badge" id="piBadge">${state.piTerms} term${state.piTerms > 1 ? "s" : ""}</span>
+              </div>
+            </div>
+
+            <div class="proof-step">
+              <div>
+                <strong>1. A diagonal of the triangle.</strong><br/>
+                Look at the diagonal that starts <strong>1, 4, 10, 20, 35, 56, 84, 120, &hellip;</strong> These are the entries ${binomHTML("n", "3")} (the <em>tetrahedral numbers</em>). We use <strong>every second entry</strong>, beginning with 4: <strong>4, 20, 56, 120, 220, 364, &hellip;</strong> These are shaded gold. Use the slider to choose how many of them to use.
+              </div>
+              <div id="piTri" style="display:flex;flex-direction:column;align-items:center">${piTriHTML()}</div>
+            </div>
+
+            <div class="proof-step">
+              <div>
+                <strong>2. Build the approximation.</strong><br/>
+                Take the <strong>reciprocal</strong> of each chosen entry. <strong>Add</strong> the first, <strong>subtract</strong> the second, add the third, and so on. Multiply the result by <strong>2/3</strong> and add <strong>3</strong>.
+              </div>
+              <div id="piEq">${piEqHTML()}</div>
+            </div>
+
+            <div class="proof-step active-step" style="grid-template-columns:1fr">
+              <div><strong>3. Watch it close in on &pi;.</strong> The running total swings alternately above and below the true value, and the swings shrink, so the estimates home in on &pi;.</div>
+              <div id="piBody">${piBodyHTML()}</div>
+            </div>
+
+            <div class="proof-step">
+              <div>
+                <strong>4. Why does it work?</strong><br/>
+                ${binomHTML("n + 2", "3")} = ${fracHTML("n(n + 1)(n + 2)", "6")}, so each term is ${fracHTML(2, 3)} &times; ${fracHTML(1, binomHTML("n + 2", "3"))} = ${fracHTML(4, "n(n + 1)(n + 2)")}.
+                The approximation is therefore the series &pi; = 3 + ${fracHTML(4, "2&middot;3&middot;4")} &minus; ${fracHTML(4, "4&middot;5&middot;6")} + ${fracHTML(4, "6&middot;7&middot;8")} &minus; &hellip;, found by the Indian mathematician <strong>Nilakantha Somayaji</strong> around 1500 CE.
+              </div>
+              <div style="background:var(--surface);padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);">
+                <strong>How good is it?</strong> It converges slowly: 12 terms give <strong>${t12}</strong>, which is correct to three decimal places (3.141). Pascal's triangle gives the denominators for free.
+              </div>
+            </div>
+          </div>
+        `;
       } else if (state.theoryTopic === "history") {
         theoryHub.innerHTML = `
           <div class="proof-box">
@@ -3772,7 +3857,8 @@
               <li><strong>~200 BCE — India (Pingala):</strong> Described the triangle as <em>Meru Prastāra</em> ("Staircase of Mount Meru") to count combinations of short and long syllables in Sanskrit poetry.</li>
               <li><strong>~950–1100 CE — Persia (Al-Karaji &amp; Omar Khayyam):</strong> Used the triangle to compute binomial expansions and extract <em>n</em>-th roots; in Iran it is recognised as the <strong>Khayyam–Pascal Triangle</strong>.</li>
               <li><strong>11th–13th Century — China (Jia Xian &amp; Yang Hui):</strong> Jia Xian used it to extract square and cube roots, and Yang Hui published it in 1261; in China it is called <strong>Yang Hui's Triangle</strong>.</li>
-              <li><strong>1654 — France (Blaise Pascal):</strong> Published <em>Traité du triangle arithmétique</em>, systematically proving its properties (including the Hockey-Stick identity) and applying it to probability theory with Pierre de Fermat.</li>
+              <li><strong>~1500 CE — India (Nilakantha Somayaji):</strong> Published an infinite series for &pi;, which can be written as 3 + &#8532; &times; (1/4 &minus; 1/20 + 1/56 &minus; &hellip;), using every second entry of a diagonal of Pascal's triangle.</li>
+                            <li><strong>1654 — France (Blaise Pascal):</strong> Published <em>Traité du triangle arithmétique</em>, systematically proving its properties (including the Hockey-Stick identity) and applying it to probability theory with Pierre de Fermat.</li>
             </ul>
           </div>
         `;
@@ -4363,6 +4449,105 @@
       renderAll();
     }
 
+    // ---------- Approximating pi from a diagonal (Nilakantha series) ----------
+    // pi = 3 + (2/3)(1/C(4,3) - 1/C(6,3) + 1/C(8,3) - ...)
+    function piEntry(t) {
+      const n = 2 * t + 2;
+      return (n * (n - 1) * (n - 2)) / 6; // C(2t+2, 3)
+    }
+    function piData(T) {
+      const out = [];
+      let sum = 0;
+      for (let t = 1; t <= T; t++) {
+        const e = piEntry(t);
+        const sign = t % 2 ? 1 : -1;
+        sum += sign / e;
+        out.push({ t, e, sign, recip: 1 / e, sum, approx: 3 + (2 / 3) * sum });
+      }
+      return out;
+    }
+    function piTriHTML() {
+      const T = state.piTerms, R = 12;
+      let h = `<div class="pi-tri">`;
+      for (let r = 0; r < R; r++) {
+        h += `<div class="pi-row">`;
+        for (let k = 0; k <= r; k++) {
+          let cls = "";
+          if (k === 3) cls = r % 2 === 0 && r <= 2 * T + 2 ? "used" : "skip";
+          h += `<div class="pi-cell ${cls}">${pascalBig[r][k]}</div>`;
+        }
+        h += `</div>`;
+      }
+      return h + `</div><div class="pi-legend"><span class="pi-key used"></span> entries used &nbsp; <span class="pi-key skip"></span> rest of the diagonal</div>`;
+    }
+    function piEqHTML() {
+      const T = state.piTerms;
+      const shown = Math.min(T, 5);
+      const parts = [];
+      for (let t = 1; t <= shown; t++) {
+        parts.push(`${t === 1 ? "" : t % 2 ? " + " : " &minus; "}${fracHTML(1, piEntry(t))}`);
+      }
+      const tail = T > shown ? ` &hellip; ${T % 2 ? "+" : "&minus;"} ${fracHTML(1, piEntry(T))}` : "";
+      return `<div class="equation-box" style="font-size:0.95rem;line-height:2.2;">
+        <span>&pi; &approx; 3 + ${fracHTML(2, 3)} &times; ( ${parts.join("")}${tail} )</span></div>`;
+    }
+    function piBodyHTML() {
+      const T = state.piTerms;
+      const all = piData(12);
+      const d = all.slice(0, T);
+      const last = d[T - 1];
+      const rows = d.map((x, i) => `<tr class="${i === T - 1 ? "last" : ""}">
+        <td>${x.t}</td><td>${x.e}</td><td>${x.sign > 0 ? "+" : "&minus;"}</td>
+        <td>${x.recip.toFixed(6)}</td><td>${x.sum.toFixed(6)}</td><td>${x.approx.toFixed(6)}</td></tr>`).join("");
+
+      // convergence chart
+      const W = 520, H = 226, L = 46, Rm = 14, Tm = 12, Bm = 28;
+      const lo = 3.125, hi = 3.175;
+      const X = (t) => L + ((t - 1) * (W - L - Rm)) / 11;
+      const Y = (v) => Tm + ((hi - v) / (hi - lo)) * (H - Tm - Bm);
+      let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-width:560px" role="img" aria-label="Approximations of pi after each term">`;
+      for (const v of [3.13, 3.14, 3.15, 3.16, 3.17]) {
+        svg += `<line x1="${L}" x2="${W - Rm}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--border)" stroke-width="1"/>` +
+          `<text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" style="fill:var(--text-muted)">${v.toFixed(2)}</text>`;
+      }
+      svg += `<line x1="${L}" x2="${W - Rm}" y1="${Y(Math.PI)}" y2="${Y(Math.PI)}" style="stroke:var(--emerald)" stroke-width="2" stroke-dasharray="6 4"/>` +
+        `<text x="${W - Rm}" y="${Y(Math.PI) - 5}" text-anchor="end" font-size="11" font-weight="700" style="fill:var(--emerald)">&pi; = 3.14159&hellip;</text>`;
+      svg += `<polyline fill="none" style="stroke:var(--primary)" stroke-width="1.8" points="${d.map((x) => `${X(x.t)},${Y(x.approx)}`).join(" ")}"/>`;
+      all.forEach((x) => {
+        const on = x.t <= T;
+        svg += `<circle cx="${X(x.t)}" cy="${Y(x.approx)}" r="${on ? 4.5 : 3}" style="fill:${on ? "var(--primary)" : "var(--border)"}"/>` +
+          `<text x="${X(x.t)}" y="${H - 16}" text-anchor="middle" font-size="11" style="fill:var(--text-muted)">${x.t}</text>`;
+      });
+      svg += `<text x="${(L + W - Rm) / 2}" y="${H - 2}" text-anchor="middle" font-size="10" style="fill:var(--text-muted)">number of terms used</text></svg>`;
+
+      return `
+        <div class="pi-two">
+          <div style="overflow-x:auto">
+            <table class="pi-table">
+              <tr><th>Term</th><th>Entry</th><th>+/&minus;</th><th>1 &divide; entry</th><th>Running total</th><th>3 + &#8532; &times; total</th></tr>
+              ${rows}
+            </table>
+          </div>
+          <div>${svg}</div>
+        </div>
+        <div class="equation-box" style="margin-top:0.4rem">
+          <span>After <strong>${T}</strong> term${T > 1 ? "s" : ""}: &pi; &approx; <strong>${last.approx.toFixed(6)}</strong>
+          &nbsp;(true value 3.141593, error ${Math.abs(Math.PI - last.approx).toFixed(6)})</span>
+        </div>`;
+    }
+    function piRefresh() {
+      const tri = document.getElementById("piTri");
+      if (!tri) return;
+      tri.innerHTML = piTriHTML();
+      document.getElementById("piEq").innerHTML = piEqHTML();
+      document.getElementById("piBody").innerHTML = piBodyHTML();
+      document.getElementById("piBadge").textContent = `${state.piTerms} term${state.piTerms > 1 ? "s" : ""}`;
+    }
+    function setPiTerms(v) {
+      state.piTerms = Number(v);
+      piRefresh();
+    }
+
     function setTheoryTopic(topic) {
       state.theoryTopic = topic;
       renderAll();
@@ -4475,7 +4660,7 @@
     function wsReadCfg() {
       const num = (id) => Number(wsG(id).value);
       const on = (id) => wsG(id).checked;
-      ["wsInsideRows", "wsRowRows", "wsAltRows", "wsHockeyCount", "wsMultRows", "wsBinomCount", "wsCoeffCount"].forEach((id) => {
+      ["wsInsideRows", "wsRowRows", "wsAltRows", "wsHockeyCount", "wsMultRows", "wsBinomCount", "wsCoeffCount", "wsPiTerms"].forEach((id) => {
         const o = wsG(id + "Out");
         if (o) o.textContent = wsG(id).value;
       });
@@ -4493,7 +4678,9 @@
         },
         binom: { on: on("wsBinomOn"), level: num("wsBinomLevel"), count: num("wsBinomCount"), ref: on("wsBinomRef") },
         coeff: { on: on("wsCoeffOn"), count: num("wsCoeffCount") },
-        proof: { on: on("wsProofOn") }
+        proof: { on: on("wsProofOn") },
+        ind: { on: on("wsIndOn"), hockey: on("wsIndHockey"), fib: on("wsIndFib") },
+        pi: { on: on("wsPiOn"), terms: num("wsPiTerms") }
       };
     }
 
@@ -4604,6 +4791,13 @@
         const k = 2 + Math.floor(rnd() * (n - 3));         // 2..n-2
         m.proof = { n, k };
       }
+      if (cfg.ind.on && (cfg.ind.hockey || cfg.ind.fib)) {
+        const k = 2 + Math.floor(rnd() * 2);               // 2 or 3
+        const n = k + 3 + Math.floor(rnd() * 2);           // k+3 or k+4
+        const a = 3 + Math.floor(rnd() * 4);               // 3..6
+        m.induct = { hockey: cfg.ind.hockey, fib: cfg.ind.fib, k, n, a };
+      }
+      if (cfg.pi.on) m.pi = { T: cfg.pi.terms };
       return m;
     }
 
@@ -4850,6 +5044,140 @@
       return `${intro}${warm}${proof}`;
     }
 
+    // ---------- Proof by induction (hockey stick + Fibonacci) ----------
+    function wsActInduct(d, ans) {
+      const bl = (t, w) => wsBl(t, ans, w);
+      const B = binomHTML;
+      const S = (x) => `<em>S</em><sub>${x}</sub>`;
+      const F = (x) => `<em>F</em><sub>${x}</sub>`;
+      let html = `<p class="ws-instr">Each part uses <strong>proof by induction</strong>: prove a starting case (the <em>base case</em>), assume the statement is true for some value (the <em>inductive hypothesis</em>), then show it must be true for the next value (the <em>inductive step</em>). Fill in the blanks.</p>`;
+
+      if (d.hockey) {
+        const k = d.k, n = d.n;
+        const rs = [];
+        for (let r = k; r <= n; r++) rs.push(r);
+        const total = rs.reduce((a, r) => a + pascalBig[r][k], 0n);
+        html += `<h3 class="ws-h3">Part A &ndash; The hockey-stick identity</h3>
+          <div class="ws-example"><h3>The identity</h3>
+            <div class="ws-math">${B("k", "k")} + ${B("k + 1", "k")} + ${B("k + 2", "k")} + &hellip; + ${B("n", "k")} = ${B("n + 1", "k + 1")} &nbsp;&nbsp; (<em>n</em> &ge; <em>k</em> &ge; 0)</div>
+            <div style="margin-top:3px">On Pascal's triangle, the left side adds the entries down a diagonal that starts at the 1 on the edge (the shaft of a hockey stick). The right side is the entry just beyond the end of the shaft (the blade).</div></div>
+          <div class="ws-block"><div class="ws-q">A1. Check with numbers: <em>k</em> = ${k}, <em>n</em> = ${n}</div>
+            <div class="ws-eq">${rs.map((r) => B(r, k)).join(" + ")}</div>
+            <div class="ws-eq">= ${rs.map((r) => bl(wsBin(r, k), 1.1)).join(" + ")} = ${bl(String(total), 1.6)}</div>
+            <div class="ws-eq">${B(n + 1, k + 1)} = ${bl(wsBin(n + 1, k + 1), 1.6)}</div></div>
+          <div class="ws-q" style="margin-top:6px">A2. The proof (induction on <em>n</em>, with <em>k</em> fixed)</div>
+          <div class="ws-instr">Let <em>P</em>(<em>n</em>) be the statement ${B("k", "k")} + ${B("k + 1", "k")} + &hellip; + ${B("n", "k")} = ${B("n + 1", "k + 1")}.</div>
+          <div class="ws-block"><strong>Base case (<em>n</em> = <em>k</em>).</strong>
+            <div class="ws-eq">Left side = ${B("k", "k")} = ${bl("1", 1)} &nbsp;&nbsp; Right side = ${B("k + 1", "k + 1")} = ${bl("1", 1)}. So <em>P</em>(<em>k</em>) is true.</div></div>
+          <div class="ws-block"><strong>Inductive hypothesis.</strong> Assume <em>P</em>(<em>m</em>) is true for some <em>m</em> &ge; <em>k</em>:
+            <div class="ws-eq">${B("k", "k")} + ${B("k + 1", "k")} + &hellip; + ${B("m", "k")} = ${B("m + 1", "k + 1")}</div></div>
+          <div class="ws-block"><strong>Inductive step.</strong> We must show <em>P</em>(<em>m</em> + 1). Start from its left side:
+            <div class="ws-eq">${B("k", "k")} + &hellip; + ${B("m", "k")} + ${B("m + 1", "k")}</div>
+            <div class="ws-eq">= ${bl(B("m + 1", "k + 1"), 2.4)} + ${B("m + 1", "k")} &nbsp; (by the inductive hypothesis)</div>
+            <div class="ws-eq">= ${B(bl("m + 2", 1.6), "k + 1")} &nbsp; (by Pascal's rule ${B("a", "b")} + ${B("a", "b &minus; 1")} = ${B("a + 1", "b")} with <em>a</em> = <em>m</em> + 1, <em>b</em> = <em>k</em> + 1)</div>
+            <div>This is the right side of <em>P</em>(<em>m</em> + 1), because (<em>m</em> + 1) + 1 = <em>m</em> + 2. So <em>P</em>(<em>m</em>) &rArr; <em>P</em>(<em>m</em> + 1).</div></div>
+          <div class="ws-block"><strong>Conclusion.</strong> By induction, <em>P</em>(<em>n</em>) is true for every <em>n</em> &ge; <em>k</em>.</div>
+          ${wsLines("Describe in words what this tells us about hockey sticks in Pascal's triangle.", "Adding the numbers down a diagonal from the edge always gives the number just beyond the end of the diagonal, one row down and one place across.", ans, 2)}`;
+      }
+
+      if (d.fib) {
+        const a = d.a, R = a + 3;
+        const diag = (m) => { const out = []; for (let j = 0; 2 * j <= m; j++) out.push(pascalBig[m - j][j]); return out; };
+        const tri = wsTriangleHTML(R, (r, k) => {
+          const s2 = r + k;
+          let cls = "";
+          if (s2 === a) cls = "stick"; else if (s2 === a + 1) cls = "sh2"; else if (s2 === a + 2) cls = "blade";
+          return { cls, text: pascalBig[r][k].toString() };
+        }, { cw: 0.7, ch: 0.56, fs: 7.5, mini: true });
+        const sums = [a, a + 1, a + 2].map((m) => diag(m).reduce((x, y) => x + y, 0n));
+        let rows = "";
+        for (let n = 0; n <= 8; n++) {
+          const e = diag(n), ex = n === 0;
+          const sum = e.reduce((x, y) => x + y, 0n);
+          rows += `<tr class="${ex ? "ws-example" : ""}"><td>${n}</td><td class="left">${e.join(" + ")}</td>` +
+            (ex || ans ? `<td class="${ans && !ex ? "ws-ans" : "ws-ex-ans"}">${sum}</td>` : `<td class="ws-blank"></td>`) + `</tr>`;
+        }
+        html += `<h3 class="ws-h3" style="${d.hockey ? "break-before:page;page-break-before:always;" : ""}">Part B &ndash; Fibonacci numbers in Pascal's triangle</h3>
+          <div class="ws-example"><h3>Shallow diagonals</h3>
+            <div>Number the entries by (row + position), so the entry in row <em>r</em>, position <em>k</em> is on <strong>shallow diagonal</strong> <em>r</em> + <em>k</em>. Shallow diagonal <em>n</em> starts at the left edge of row <em>n</em> and runs up and to the right: ${B("n", "0")}, ${B("n &minus; 1", "1")}, ${B("n &minus; 2", "2")}, &hellip; as long as the position is no bigger than the row. Let ${S("n")} be the sum of its entries.</div>
+            <div style="margin-top:3px">The <strong>Fibonacci numbers</strong> are ${F(1)} = 1, ${F(2)} = 1 and ${F("n + 2")} = ${F("n + 1")} + ${F("n")}.</div></div>
+          <div class="ws-block"><div class="ws-q">B1. Three neighbouring shallow diagonals</div>
+            ${tri}
+            <div class="ws-instr">Diagonal ${a} is gold, diagonal ${a + 1} is blue with a dashed border, and diagonal ${a + 2} is pink. Add the entries on each one.</div>
+            <div class="ws-eq">${S(a)} = ${bl(String(sums[0]), 1.4)} &nbsp;&nbsp; ${S(a + 1)} = ${bl(String(sums[1]), 1.4)} &nbsp;&nbsp; ${S(a + 2)} = ${bl(String(sums[2]), 1.4)}</div>
+            ${wsLines("How are the three sums connected?", `${sums[0]} + ${sums[1]} = ${sums[2]}: two neighbouring shallow diagonals add up to the next one.`, ans, 2)}</div>
+          <div class="ws-block"><div class="ws-q">B2. The sums for diagonals 0 to 8</div>
+            <table class="ws-table"><tr><th>Diagonal <em>n</em></th><th>Entries</th><th>Sum ${S("n")}</th></tr>${rows}</table>
+            ${wsLines("What sequence do the sums make? Write the next two sums: ______ and ______", "1, 1, 2, 3, 5, 8, 13, 21, 34: the Fibonacci numbers. Next: 55 and 89.", ans, 2)}</div>
+          <div class="ws-q" style="margin-top:8px">B3. Why do neighbouring diagonals add to the next one?</div>
+          <div class="ws-block"><strong>Step 1.</strong> The entry in row <em>n</em> + 2 &minus; <em>j</em>, position <em>j</em> (on diagonal <em>n</em> + 2) is the sum of the two entries above it, by Pascal's rule:
+            <div class="ws-eq">${B("n + 2 &minus; j", "j")} = ${B(bl("n + 1 &minus; j", 2.2), "j")} + ${B(bl("n + 1 &minus; j", 2.2), bl("j &minus; 1", 1.6))}</div></div>
+          <div class="ws-block"><strong>Step 2.</strong> The first of these is on diagonal (<em>n</em> + 1 &minus; <em>j</em>) + <em>j</em> = ${bl("n + 1", 1.5)}. The second is on diagonal (<em>n</em> + 1 &minus; <em>j</em>) + (<em>j</em> &minus; 1) = ${bl("n", 1)}.</div>
+          <div class="ws-block"><strong>Step 3.</strong> So every entry of diagonal <em>n</em> + 2 is made from one entry of diagonal <em>n</em> + 1 and one entry of diagonal <em>n</em>, and each entry of those two diagonals is used exactly once (the 1s at the ends have only one entry above them; count the missing entry as 0). Therefore
+            <div class="ws-eq">${S("n + 2")} = ${bl(S("n + 1"), 1.6)} + ${bl(S("n"), 1.2)}</div></div>
+          <div class="ws-q" style="margin-top:8px">B4. Induction: the diagonal sums are Fibonacci numbers</div>
+          <div class="ws-instr">Claim: ${S("n")} = ${F("n + 1")} for every <em>n</em> &ge; 0.</div>
+          <div class="ws-block"><strong>Base cases.</strong> (Two are needed, because each step uses the two previous values.)
+            <div class="ws-eq">${S(0)} = ${bl("1", 1)} = ${F(1)} &nbsp;&nbsp; ${S(1)} = ${bl("1", 1)} = ${F(2)}</div></div>
+          <div class="ws-block"><strong>Inductive hypothesis.</strong> Assume ${S("m")} = ${F("m + 1")} and ${S("m + 1")} = ${F("m + 2")} for some <em>m</em> &ge; 0.</div>
+          <div class="ws-block"><strong>Inductive step.</strong> Using B3,
+            <div class="ws-eq">${S("m + 2")} = ${S("m + 1")} + ${bl(S("m"), 1.2)} = ${F("m + 2")} + ${bl(F("m + 1"), 1.4)} = ${F(bl("m + 3", 1.5))}</div>
+            <div>The last step is the definition of the Fibonacci numbers. This is exactly the claim for <em>n</em> = <em>m</em> + 2.</div></div>
+          <div class="ws-block"><strong>Conclusion.</strong> By induction, ${S("n")} = ${F("n + 1")} for every <em>n</em> &ge; 0.</div>`;
+      }
+      return html;
+    }
+
+    // ---------- Approximating pi ----------
+    function wsActPi(d, ans) {
+      const T = d.T;
+      const B = binomHTML, bl = (t, w) => wsBl(t, ans, w);
+      const entry = (t) => { const n = 2 * t + 2; return (n * (n - 1) * (n - 2)) / 6; };
+      const tri = wsTriangleHTML(10, (r, k) => ({
+        cls: k === 3 && r >= 3 ? (r % 2 === 0 ? "stick" : "sh2") : "",
+        text: pascalBig[r][k].toString()
+      }), { cw: 0.7, ch: 0.54, fs: 7.5, mini: true });
+
+      const blanks = [];
+      for (let r = 10; r <= 2 * T + 2; r++) {
+        blanks.push(`<span class="ws-nowrap">Row ${r}: ${bl(String((r * (r - 1) * (r - 2)) / 6), 1.5)}</span>`);
+      }
+      const partA = `<h3 class="ws-h3">Part A &ndash; A diagonal of the triangle</h3>
+        <div class="ws-instr">The shaded diagonal starts 1, 4, 10, 20, 35, 56, 84, &hellip; Gold entries are the ones we will use (every second entry from 4); blue entries are skipped.</div>
+        ${tri}
+        <div class="ws-instr">The triangle stops at row 9, but the diagonal carries on. Each entry is the one before it plus the matching entry from the diagonal above (1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120, 136, &hellip;). For example 120 = 84 + 36. Continue the diagonal:</div>
+        <div class="ws-eq" style="line-height:2.2">${blanks.join(" &nbsp; ")}</div>`;
+
+      let sum = 0, rows = "";
+      for (let t = 1; t <= T; t++) {
+        const e = entry(t), sign = t % 2 ? 1 : -1;
+        sum += sign / e;
+        const ex = t === 1;
+        rows += `<tr class="${ex ? "ws-example" : ""}"><td>${t}</td><td>${e}</td><td>${sign > 0 ? "+" : "&minus;"}</td>` +
+          (ex || ans
+            ? `<td class="${ans && !ex ? "ws-ans" : "ws-ex-ans"}">${(1 / e).toFixed(6)}</td><td class="${ans && !ex ? "ws-ans" : "ws-ex-ans"}">${sum.toFixed(6)}</td>`
+            : `<td class="ws-blank"></td><td class="ws-blank"></td>`) + `</tr>`;
+      }
+      const approx = 3 + (2 / 3) * sum;
+      const partB = `<h3 class="ws-h3">Part B &ndash; Reciprocals and a running total</h3>
+        <div class="ws-instr">Use a calculator. The reciprocal of an entry is 1 &divide; entry. <strong>Add</strong> the first reciprocal, <strong>subtract</strong> the second, add the third, and so on, writing the running total each time (6 decimal places). Term 1 is done for you.${ans ? " <span class='ws-red'>(Your last digit may differ slightly because of rounding.)</span>" : ""}</div>
+        <table class="ws-table"><tr><th>Term</th><th>Entry</th><th>Add or subtract</th><th>1 &divide; entry</th><th>Running total</th></tr>${rows}</table>`;
+
+      const partC = `<h3 class="ws-h3">Part C &ndash; The approximation</h3>
+        <div class="ws-eq">&pi; &approx; 3 + ${fracHTML(2, 3)} &times; ${bl(sum.toFixed(6), 2.4)} = ${bl(approx.toFixed(5), 2.4)}</div>
+        <div class="ws-eq">The true value is &pi; = 3.14159&hellip;. Difference (ignore the sign): ${bl(Math.abs(Math.PI - approx).toFixed(5), 2.4)}</div>
+        ${wsLines("What do you notice about the running totals as you use more terms?", "The running totals swing above and below the final value, and the swings get smaller, so the approximations get closer to &pi; (but quite slowly).", ans, 3)}`;
+
+      const partD = `<h3 class="ws-h3">Part D &ndash; Why does it work?</h3>
+        <div class="ws-instr">The entries we used are ${B("n + 2", "3")} for <em>n</em> = 2, 4, 6, &hellip; Fill in the blanks.</div>
+        <div class="ws-eq">${B("n + 2", "3")} = ${fracHTML("(n + 2)!", "3! &times; (n &minus; 1)!")} = ${fracHTML(bl("n(n + 1)(n + 2)", 3.2), "6")}</div>
+        <div class="ws-eq">${fracHTML(2, 3)} &times; ${fracHTML(1, B("n + 2", "3"))} = ${fracHTML(2, 3)} &times; ${fracHTML(6, "n(n + 1)(n + 2)")} = ${fracHTML(bl("4", 1), "n(n + 1)(n + 2)")}</div>
+        <div class="ws-eq">Check the first term (<em>n</em> = 2): ${fracHTML(4, "2 &times; 3 &times; 4")} = ${bl("1/6", 1.6)} &nbsp; and &nbsp; ${fracHTML(2, 3)} &times; ${fracHTML(1, 4)} = ${bl("1/6", 1.6)}</div>
+        <div class="ws-instr">So the approximation is the series &pi; = 3 + ${fracHTML(4, "2&middot;3&middot;4")} &minus; ${fracHTML(4, "4&middot;5&middot;6")} + ${fracHTML(4, "6&middot;7&middot;8")} &minus; &hellip;, discovered by the Indian mathematician Nilakantha Somayaji around 1500 CE.</div>`;
+
+      return `<p class="ws-instr">Pascal's triangle hides a way to approximate &pi;: &pi; &approx; 3 + ${fracHTML(2, 3)} &times; ( ${fracHTML(1, 4)} &minus; ${fracHTML(1, 20)} + ${fracHTML(1, 56)} &minus; ${fracHTML(1, 120)} + &hellip; )</p>${partA}${partB}${partC}${partD}`;
+    }
+
     // ---------- Assembly: one worksheet per topic, page break between each ----------
     const WS_TOPICS = [
       { key: "inside", title: "Pascal's Triangle: Fill in the Triangle", fn: wsActInside },
@@ -4859,7 +5187,9 @@
       { key: "mult", title: "Pascal's Triangle: Colouring Multiples", fn: wsActMult },
       { key: "binom", title: "Binomial Expansion", fn: wsActBinom },
       { key: "coeff", title: "Binomial Coefficients and Factorials", fn: wsActCoeff },
-      { key: "proof", title: "Proving the Pascal's Triangle Rule", fn: wsActProof }
+      { key: "proof", title: "Proving the Pascal's Triangle Rule", fn: wsActProof },
+      { key: "induct", title: "Proof by Induction", fn: wsActInduct },
+      { key: "pi", title: "Approximating \u03C0 with Pascal's Triangle", fn: wsActPi }
     ];
 
     function wsSheetHTML(title, body, ans, pageBreak) {
